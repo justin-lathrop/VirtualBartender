@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+
+    <title>Virtual Bartender</title>
+
+    <link href="sencha-touch.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    
+    <script src="sencha-touch.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var app = Ext.application({
+            launch: function(){
+                Ext.create('Ext.Container', {
+                    fullscreen: true,
+                    layout: 'hbox',
+                    items: [
+                        {
+                            xtype: 'panel',
+                            docked: 'left',
+                            width: '300px',
+                            html: 'message list',
+                            items: [
+                                {
+                                    xtype: 'toolbar',
+                                    ui: 'light',
+                                    docked: 'top',
+                                }
+                            ],
+                            flex: 1
+                        },
+                        {
+                            xtype: 'panel',
+                            html: 'TEST',
+                            items: [
+                                {
+                                    xtype: 'toolbar',
+                                    ui: 'dark',
+                                    title: 'Virtual Bartender',
+                                    docked: 'top'   
+                                }
+                            ],
+                            flex: 2
+                        }
+                    ],
+                    listeners: {
+                        resize: function(){
+                            this.width = window.document.width;
+
+                            if(this.width <= 800){
+                                
+                            }
+                        }// widthchange
+                    }
+                });
+            } // launch
+        }); // application
+    </script>
+    
+</body>
+</html>
