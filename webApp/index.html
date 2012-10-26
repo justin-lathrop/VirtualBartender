@@ -8,13 +8,12 @@
 	<script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
  
   <script>
+      // Globals
+      var url = window.location;
+
       function buttonClicked(){
           $.ajax({
-              url: 'http://10.0.1.6:8200/helloWorld?name=Justin',
-              //dataType: "jsonp",
-              //jsonpCallback: "_testcb",
-              //cache: false,
-              //timeout: 5000,
+              url: url + 'helloWorld?name=Justin',
               success: function(data){
                   $("#test").append(data);
               },
@@ -23,7 +22,7 @@
                   alert(jqXHR.responseText);
               }
           });
-      }
+      }// buttonClicked
   </script>
 </head> 
 <body>

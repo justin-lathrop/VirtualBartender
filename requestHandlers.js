@@ -4,7 +4,7 @@ var querystring = require("querystring");
 function start(response, postData, getData){
 	console.log("Request handler 'start' was called.");
  
-		process('cat ~/SeniorProject/VirtualBartender/webApp/index.html', function(error, stdout){
+		process('cat ./webApp/index.html', function(error, stdout){
 			response.writeHead(200, {"Content-Type": "text/html"});
 			response.write(stdout);
 			response.end();
@@ -14,7 +14,7 @@ function start(response, postData, getData){
 function helloWorld(response, postData, getData){
     console.log("Request handler 'helloWorld' was called.");
     
-    process('~/SeniorProject/VirtualBartender/testCode/helloWorld ' + getData['name'], function(error, stdout){
+    process('./testCode/helloWorld ' + getData['name'], function(error, stdout){
         console.log('stdout: ' + stdout);
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end(stdout);

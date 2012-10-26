@@ -1,7 +1,7 @@
 var http = require("http");
 var url = require("url");
 
-function start(route, handle){
+function start(route, handle, port){
 	function onRequest(request, response){
 		var postData = "";
 		var pathname = url.parse(request.url).pathname;
@@ -19,8 +19,8 @@ function start(route, handle){
 		});// end listener
 	}// onRequest
 
-	http.createServer(onRequest).listen(8200);
-	console.log("Server has started listening on port 8100");
+	http.createServer(onRequest).listen(port);
+	console.log("Server has started listening on port " + port);
 }// start
 
 exports.start = start;

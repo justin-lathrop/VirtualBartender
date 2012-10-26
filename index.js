@@ -6,4 +6,4 @@ var handle = {}
 handle["/"] = requestHandlers.start;
 handle["/helloWorld"] = requestHandlers.helloWorld;
 
-server.start(router.route, handle);
+server.start(router.route, handle, process.argv[2]);
