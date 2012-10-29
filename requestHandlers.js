@@ -1,5 +1,6 @@
 var process = require("child_process").exec;
 var querystring = require("querystring");
+var fs = require("fs");
 
 function start(response, postData, getData){
 	console.log("Request handler 'start' was called.");
@@ -22,5 +23,15 @@ function helloWorld(response, postData, getData){
     });
 }// helloWorld
 
+	function image(response, postData, getData){
+		console.log("Request handler 'image' was called.");
+
+		var img = fs.readFileSync('./webApp/' + getData['name']);
+
+		response.writeHead(200, {'Content-Type': 'image/png'});
+		response.end(img, 'binary');
+	}// image
+
 exports.start = start;
 exports.helloWorld = helloWorld;
+exports.image = image;

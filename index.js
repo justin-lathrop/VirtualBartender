@@ -5,6 +5,6 @@ var requestHandlers = require("./requestHandlers");
 var handle = {}
 handle["/"] = requestHandlers.start;
 handle["/helloWorld"] = requestHandlers.helloWorld;
-handle["/webApp"] = requestHandlers.webApp;
+handle["/image"] = requestHandlers.image;
 
 server.start(router.route, handle, process.argv[2]);
