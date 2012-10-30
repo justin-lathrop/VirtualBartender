@@ -12,8 +12,8 @@ function start(response, postData, getData){
 	});
 }// start
 
-function helloWorld(response, postData, getData){
-    console.log("Request handler 'helloWorld' was called.");
+function makeDrink(response, postData, getData){
+    console.log("Request handler 'makeDrink' was called.");
     
     process('./testCode/helloWorld ' + getData['name'], function(error, stdout){
         console.log('stdout: ' + stdout);
@@ -21,7 +21,7 @@ function helloWorld(response, postData, getData){
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end(stdout);
     });
-}// helloWorld
+}// makeDrink
 
 function image(response, postData, getData){
 	console.log("Request handler 'image' was called.");
@@ -43,7 +43,17 @@ function recipes(response, postData, getData){
     });// process
 }// recipes
 
+function getIngredients(response, postData, getData){
+    console.log("Request handler 'getIngredients' was called.");
+
+    process('cat ./webApp/drinks/' + getData['name'], function(error, stdout){
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        response.end(stdout);
+    });// process
+}// getIngredients
+
 exports.start = start;
-exports.helloWorld = helloWorld;
+exports.makeDrink = makeDrink;
 exports.image = image;
 exports.recipes = recipes;
+exports.getIngredients = getIngredients;

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
   <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
   <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
- <!--------------------------- SCRIPTS ---------------------------------->
+ <!-------------------------- SCRIPTS ---------------------------------->
   <script>
     // Globals
     var url = "http://" + window.location.hostname + ":" + window.location.port + "/";
@@ -30,17 +30,40 @@
         //stuff here on each page load/init
     });// pageinit
 
-    function buttonClicked(id){
+    function getContents(id){
+        // Given id and name, fill in drink details
         $.ajax({
-            url: url + 'helloWorld?name=Justin',
+            url: url + 'getIngredients?name=' + id + '.js',
             success: function(data){
-                $("#" + id).append(data);
+                // fill in details page
+                $("#title").empty().append(data.title);
+                //$("#drinkImage").
+                
+                $("#drinksIncluded").empty();
+                for(var i = 0; i < data.drinkList.length; i++){
+                    //alert(data.drinkList[i].name);
+                    $("#drinksIncluded").append(data.drinkList[i].name + ", " + data.drinkList[i].amount + " ounces.<br />");
+                }// for
+
+                $("#alcoholPercentage").empty().append("Aclohol Percentage: " + data.alcoholPerc);
             },
             error: function(jqXHR, textStatus, errorThrown){
                 alert('error ' + textStatus + " " + errorThrown);
             }
         });// ajax
-    }// buttonClicked
+    }// getContents
+
+    function orderDrink(id){
+        $.ajax({
+            url: url + 'makeDrink?name=' + id,
+            success: function(data){
+                alert("Order is complete!");
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                alert('error ' + textStatus + " " + errorThrown);
+            }
+        });// ajax
+    }// orderDrink
   </script>
   <!---------------------------- STYLING -------------------------->
   <style>
@@ -56,7 +79,7 @@
   </style>
 </head> 
 <body>
-    <!------------------------------- HOME ------------------------------>
+    <!------------------------------ HOME ------------------------------>
     <div data-role="page" id="home">
       <div data-role="header">
         <h1>Virtual Bartender</h1>
@@ -78,7 +101,7 @@
         </div><!-- footer -->
     </div><!-- page -->
 
-    <!------------------------------- MENU ------------------------------>
+    <!------------------------------ MENU ------------------------------>
     <div data-role="page" id="menu">
         <div data-role="header">
             <h1>Virtual Bartender</h1>
@@ -103,7 +126,7 @@
         </div><!-- footer -->
     </div><!-- page -->
 
-    <!------------------------------- CUSTOM ------------------------------>
+    <!------------------------------ CUSTOM ------------------------------>
     <div data-role="page" id="custom">
         <div data-role="header">
             <h1>Virtual Bartender</h1>
@@ -112,7 +135,7 @@
             <center>
                 <h1>Create a custom drink!</h1>
                 <form action="create" method="POST">
-
+                    
                 </form>
             <center>
         </div><!-- content -->
@@ -127,18 +150,17 @@
         </div><!-- footer -->
     </div><!-- page -->
 
-    <!------------------------------- Drink Details ------------------------------>
+    <!------------------------------ Drink Details ------------------------------>
     <div data-role="page" id="details">
         <div data-role="header">
-            <h1></h1>
+            <h1 id="title"></h1>
         </div><!-- header -->
         <div data-role="content">
             <center>
-                <h1 id="title"></h1>
                 <img src="" id="drinkImage" />
                 <div id="drinksIncluded"></div>
                 <div id="alcoholPercentage"></div>
-                <div id="directions"></div>
+                <button id="order" onclick="orderDrink('rumAndCoke');">Order this Drink!</button>
             <center>
         </div><!-- content -->
     </div><!-- page -->
