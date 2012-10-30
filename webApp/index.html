@@ -12,23 +12,22 @@
     // Globals
     var url = "http://" + window.location.hostname + ":" + window.location.port + "/";
 
-    $(document).bind('pageinit', function(){
-      /*var page = window.location.href.split('/');
-      page = page[page.length - 1];
+    $(document).ready(function(){
+        // Obtain and fill in all the recipes
+        $.ajax({
+            url: url + 'recipes',
+            success: function(data){
+                $("#menuList").append(data);
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                alert('error ' + textStatus + " " + errorThrown);
+            }
+        });// ajax
+        ///////////////////////////////////
+    });// ready
 
-      if("#menu" === page){
-        $("#menu").attr('data-theme', 'b');
-        $("#custom").attr('data-theme', 'a');
-        $("#home").attr('data-theme', 'a');
-      }else if("#custom" === page){
-        $("#menu").attr('data-theme', 'a');
-        $("#custom").attr('data-theme', 'b');
-        $("#home").attr('data-theme', 'a');
-      }else if("#home" === page){
-        $("#menu").attr('data-theme', 'a');
-        $("#custom").attr('data-theme', 'a');
-        $("#home").attr('data-theme', 'b');
-      }// if*/
+    $(document).bind('pageinit', function(){
+        //stuff here on each page load/init
     });// pageinit
 
     function buttonClicked(id){
@@ -84,11 +83,14 @@
         <div data-role="header">
             <h1>Virtual Bartender</h1>
         </div><!-- header -->
-        <div data-role="content">   
-            <h1>Welcome to the Virtual Bartender!</h1>
-            <div class="inset">menu</div>
-            <div id="test" class="inset"></div>
-            <button onclick="buttonClicked('test');">Test Me!</button>
+        <div data-role="content">
+            <center>
+                <h1>Type to search all our drink recipes!</h1>
+                <ul id="menuList" data-role="listview" data-filter="true" data-inset="true" data-autodividers="true"
+                data-filter-placeholder="Search drink recipes...">
+                    <!-- Gets filled in after initial page load -->
+                </ul>
+            </center>
         </div><!-- content -->
         <div data-role="footer" data-position="fixed">
             <div data-role="navbar">
@@ -106,9 +108,13 @@
         <div data-role="header">
             <h1>Virtual Bartender</h1>
         </div><!-- header -->
-        <div data-role="content">   
-            <h1>Welcome to the Virtual Bartender!</h1>
-            <div class="inset">Custom order</div>
+        <div data-role="content">
+            <center>
+                <h1>Create a custom drink!</h1>
+                <form action="create" method="POST">
+
+                </form>
+            <center>
         </div><!-- content -->
         <div data-role="footer" data-position="fixed">
             <div data-role="navbar">
@@ -119,6 +125,22 @@
                 </ul>
             </div><!-- navbar -->
         </div><!-- footer -->
+    </div><!-- page -->
+
+    <!------------------------------- Drink Details ------------------------------>
+    <div data-role="page" id="details">
+        <div data-role="header">
+            <h1></h1>
+        </div><!-- header -->
+        <div data-role="content">
+            <center>
+                <h1 id="title"></h1>
+                <img src="" id="drinkImage" />
+                <div id="drinksIncluded"></div>
+                <div id="alcoholPercentage"></div>
+                <div id="directions"></div>
+            <center>
+        </div><!-- content -->
     </div><!-- page -->
 </body>
 </html>

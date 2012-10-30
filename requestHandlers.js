@@ -23,15 +23,27 @@ function helloWorld(response, postData, getData){
     });
 }// helloWorld
 
-	function image(response, postData, getData){
-		console.log("Request handler 'image' was called.");
+function image(response, postData, getData){
+	console.log("Request handler 'image' was called.");
 
-		var img = fs.readFileSync('./webApp/' + getData['name']);
+	var img = fs.readFileSync('./webApp/' + getData['name']);
 
-		response.writeHead(200, {'Content-Type': 'image/png'});
-		response.end(img, 'binary');
-	}// image
+	response.writeHead(200, {'Content-Type': 'image/png'});
+	response.end(img, 'binary');
+}// image
+
+function recipes(response, postData, getData){
+    console.log("Request handler 'recipes' was called.");
+    
+    process('cat ./webApp/recipes.html', function(error, stdout){
+        //console.log('stdout: ' + stdout);
+
+        response.writeHead(200, {'Content-Type': 'text/plain'});
+        response.end(stdout);
+    });// process
+}// recipes
 
 exports.start = start;
 exports.helloWorld = helloWorld;
 exports.image = image;
+exports.recipes = recipes;
