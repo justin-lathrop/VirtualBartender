@@ -1,5 +1,12 @@
-var http = require("http");
+//var http = require("http");
+var https = require("https");
 var url = require("url");
+var fs = require("fs");
+
+var options = {
+	key: fs.readFileSync("private-key.pem"),
+	cert: fs.readFileSync("public-cert.pem")
+}
 
 function start(route, handle, port){
 	function onRequest(request, response){
@@ -19,7 +26,7 @@ function start(route, handle, port){
 		});// end listener
 	}// onRequest
 
-	http.createServer(onRequest).listen(port);
+	https.createServer(options, onRequest).listen(port);
 	console.log("Server has started listening on port " + port);
 }// start
 

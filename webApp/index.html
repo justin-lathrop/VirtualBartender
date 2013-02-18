@@ -4,13 +4,14 @@
   <title>Virtual Bartender</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
-  <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
-  <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+  <link rel="stylesheet" href="./css?name='jquery.mobile-1.2.0.min.css'" />
+  <script src="./js?name='jquery-1.8.2.js'"></script>
+  <script src="./js?name='jquery.mobile-1.2.0.min.js'"></script>
  <!-------------------------- SCRIPTS ---------------------------------->
   <script>
     // Globals
-    var url = "http://" + window.location.hostname + ":" + window.location.port + "/";
+    var url = "https://" + window.location.hostname + ":" + window.location.port + "/";
+    var listQueueInt;
 
     $(document).ready(function(){
         // Obtain and fill in all the recipes
@@ -24,7 +25,9 @@
             }
         });// ajax
         ///////////////////////////////////
-    });// ready
+ 
+	listQueueInt = window.setInterval(drinkQueue, 10000);
+   });// ready
 
     $(document).bind('pageinit', function(){
         //stuff here on each page load/init
@@ -46,10 +49,14 @@
                 }// for
 
                 $("#alcoholPercentage").empty().append("Aclohol Percentage: " + data.alcoholPerc);
+
+		$("#order").unbind("click");
+		$("#order").click(function(){ orderDrink(id); });
             },
             error: function(jqXHR, textStatus, errorThrown){
-                alert('error ' + textStatus + " " + errorThrown);
-            }
+                //alert('error ' + textStatus + " " + errorThrown);
+		alert('Unable to communicate, error code 214');
+	    }
         });// ajax
     }// getContents
 
@@ -57,13 +64,39 @@
         $.ajax({
             url: url + 'makeDrink?name=' + id,
             success: function(data){
-                alert("Order is complete!");
+                alert(data);
             },
             error: function(jqXHR, textStatus, errorThrown){
-                alert('error ' + textStatus + " " + errorThrown);
+                //alert('error ' + textStatus + " " + errorThrown);
+		alert('Unable to order your drink, try again at a later time please.');
             }
         });// ajax
     }// orderDrink
+
+    function drinkQueue(){
+	$.ajax({
+	    url: url + 'drinkQueue',
+	    success: function(data){
+		//alert(data);
+		var queue = data.split('\n');
+		for(var i = 0; i < queue.length - 1; i++){
+		    queue[i] = queue[i].split('.')[0];
+		}// for
+		//alert(queue);
+
+		$('#drinkQueueList').empty();
+		for(var i = 0; i < queue.length - 1; i++){
+		    $('#drinkQueueList').append('<li>'+ queue[i].split('_')[0] +' '+ queue[i].split('_')[1] +'</li>');
+		}// for
+		$('#drinkQueueList').listview('refresh');
+	    },
+	    error: function(jqXHR, textStatus, errorThrown){
+		//alert('error ' + textStatus + " " + errorThrown);
+		alert('There was an error please report this code: 213');
+		window.clearInterval(listQueueInt);
+	    }
+	});// ajax
+    }// drinkQueue
   </script>
   <!---------------------------- STYLING -------------------------->
   <style>
@@ -95,7 +128,7 @@
                 <ul>
                     <li><a id="home" data-theme="b" href="#">Home</a></li>
                     <li><a id="menu" data-theme="a" href="#menu" data-transition="fade">Menu</a></li>
-                    <li><a id="custom" data-theme="a" href="#custom" data-transition="fade">Custom</a></li>
+                    <li><a id="lineUp" data-theme="a" href="#lineUp" data-transition="fade">Line Up</a></li>
                 </ul>
             </div><!-- navbar -->
         </div><!-- footer -->
@@ -120,23 +153,21 @@
                 <ul>
                     <li><a id="home" href="#home" data-theme="a" data-transition="fade">Home</a></li>
                     <li><a id="menu" href="#" data-theme="b">Menu</a></li>
-                    <li><a id="custom" href="#custom" data-theme="a" data-transition="fade">Custom</a></li>
+                    <li><a id="lineUp" href="#lineUp" data-theme="a" data-transition="fade">Line Up</a></li>
                 </ul>
             </div><!-- navbar -->
         </div><!-- footer -->
     </div><!-- page -->
 
-    <!------------------------------ CUSTOM ------------------------------>
-    <div data-role="page" id="custom">
+    <!------------------------------ LINE UP ------------------------------>
+    <div data-role="page" id="lineUp">
         <div data-role="header">
             <h1>Virtual Bartender</h1>
         </div><!-- header -->
         <div data-role="content">
             <center>
-                <h1>Create a custom drink!</h1>
-                <form action="create" method="POST">
-                    
-                </form>
+                <h1>Remember Your Order Number?</h1>
+                <ul id="drinkQueueList" data-role="listview"></ul>
             <center>
         </div><!-- content -->
         <div data-role="footer" data-position="fixed">
@@ -144,7 +175,7 @@
                 <ul>
                     <li><a id="home" href="#home" data-theme="a" data-transition="fade">Home</a></li>
                     <li><a id="menu" href="#menu" data-theme="a" data-transition="fade">Menu</a></li>
-                    <li><a id="custom" data-theme="b" href="#">Custom</a></li>
+                    <li><a id="lineUp" data-theme="b" href="#">Line Up</a></li>
                 </ul>
             </div><!-- navbar -->
         </div><!-- footer -->
@@ -160,7 +191,7 @@
                 <img src="" id="drinkImage" />
                 <div id="drinksIncluded"></div>
                 <div id="alcoholPercentage"></div>
-                <button id="order" onclick="orderDrink('rumAndCoke');">Order this Drink!</button>
+                <button id="order" onclick="">Order this Drink!</button>
             <center>
         </div><!-- content -->
     </div><!-- page -->

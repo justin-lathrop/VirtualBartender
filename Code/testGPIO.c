@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 int main(void){
-	int pin = 25;
+	int pin = 0;
 	
 	printf("Beginning GPIO test with wiringPi.");
 
@@ -17,19 +17,19 @@ int main(void){
 	pinMode(pin, OUTPUT);
 
 	// Begin main GPIO test program
-	for(;;){
-		printf(", Begin main program");
-
-		printf(", LED ON");
+	printf("Begin, ");
+	//for(;;){
+		//printf(", LED ON");
 		digitalWrite(pin, 1);
 
 		delay(500);
 
-		printf(", LED OFF");
+		//printf(", LED OFF");
 		digitalWrite(pin, 0);
 
 		delay(500);
-	}// for
+	//}// for
+	printf("Complete.");
 
 	return(0);
 }// main
