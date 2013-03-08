@@ -14,12 +14,11 @@ handle["/js"] = requestHandlers.js;
 handle["/css"] = requestHandlers.css;
 
 GLOBAL.orderNum = 0;
-GLOBAL.orderQueue = [];
 
 process.on('SIGINT', function(){
 	console.log('\n\nCleaning up Server then shutting down.\n\n');
 
-	p('rm -f ./Orders/*.order; rm -f ./CurrentOrders/*.order; rm -f ./CompletedOrders/*.order', function(){});
+	p('rm -f ../controller/Orders/*.order; rm -f ./OrdersCompleted/*.order', function(){});
 
 	process.exit();
 });

@@ -29,39 +29,49 @@
 import serial
 import time
 import os
+import json
 
 orderDir = 'Orders'
 completedDir = 'OrdersCompleted'
-recipeDir = '../server/drinks/'
 serialDevice = '/dev/ttyACM0'
 baudRate = '115200'
 
 """
-" Holds all data needed for 
-" each step for a specific 
-" drink.
+" Marks current order as complete 
+" by removing it from the orderDir 
+" and appending it inside the 
+" completedDir.
+" 
+" @return: True if success and 
+" False if error.
 """
-class step:
-	def __init__(self, code):
-		self.codeNum = code
-
-"""
-" Holds all the steps needed 
-" and commands for arduino to 
-" process each step.
-"""
-class order:
-	def __init__(self, drinkName):
-		self.drinkName = drinkName
-		self.steps = []
-
-	def addStep():
-		"""  """
+def markOrderComplete():
+	orders = os.listdir(orderDir)
+	if len(orders) > 0:
+		# Save the current order
+		orders.sort()
+		orderName = orders[0]
+		orderContents = json.load(open(orderDir + '/' + orders[0]))
+		
+		# Delete current order from order directory
+		os.remove(orderDir + '/' + orderName)
+		
+		# Put current order into completed directory
+		newFile = open(completedDir + '/' + orderName, 'w')
+		newFile.write(orderContents)
+		newFile.close()
+		
+		return True
+	return False
 
 """
 " Checks the 'Orders' directory
 " and gets the next order within
-" it.
+" it.  If no orders are found 
+" then it will wait until an 
+" order is filled.  Will check 
+" periodically (5 seconds) until 
+" an order is placed.
 "
 " @param: String <order directory>
 " 
@@ -70,22 +80,53 @@ class order:
 " return null.
 """
 def getNextOrder():
-	print os.listdir(orderDir)
-	return
+	orders = []
+	while 1:
+		orders = os.listdir(orderDir)
+		if len(orders) > 0:
+			orders.sort()
+			break;
+		else:
+			time.sleep(5)
+	return json.load(open(orderDir + '/' + orders[0]))
+
+"""
+" Fills the order of a drink and 
+" is in charge of sending commands 
+" to Arduino to process.
+" 
+" @param: Order <order> which holds 
+" all of the drinks information 
+" needed to create it.
+" 
+" @return: True is successful and 
+" False by default if unsuccessful.
+"""
+def fillOrder(order):
+	print 'Filling order <' + order + '>'
+	time.sleep(3)
+	return True
 
 def main():
 	print 'Initializing Controller'
-
 	ser = serial.Serial(serialDevice, baudRate)
 	time.sleep(5)
 	ser.flush()
 	ser.flushInput()
 	ser.flushOutput()
-
 	print 'Initialization Complete'
 	print
 
-	getNextOrder()
+	# Loop forever filling orders
+	while 1:
+		currentOrder = getNextOrder()
+		if fillOrder(currentOrder):
+			markOrderComplete(currentOrder)
+			print 'Order complete'
+		else:
+			print 'Failed to make order'
+		time.sleep(2)
+	print 'Controller exited'
 
 if __name__ == '__main__':
 	main()

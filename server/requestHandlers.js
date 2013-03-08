@@ -17,20 +17,14 @@ function makeDrink(response, postData, getData){
     
     GLOBAL.orderNum++;
 
-    process('echo "It worked" > ./Orders/'+ getData['name'] +'_'+ GLOBAL.orderNum +'.order', function(error, stdout){
-	 console.log('Order created');
-    
-	 response.writeHead(200, {'Content-Type': 'text/plain'});
-	 response.end("Order Number: "+ GLOBAL.orderNum);
-    });
+	process('cat ./webApp/drinks/' + getData['name'], function(error, stdout){
+		process('echo "'+ stdout +'" > ../controller/Orders/'+ GLOBAL.orderNum +'.order', function(error, stdout){
+		 console.log('Order sent');
 
-    //Test GPIO Pins (.c) Program
-    //process('sudo ./Code/testGPIO', function(error, stdout){
-    //    console.log('stdout: ' + stdout);
-
-    //    response.writeHead(200, {'Content-Type': 'text/plain'});
-    //    response.end(stdout);
-    //});
+		 response.writeHead(200, {'Content-Type': 'text/plain'});
+		 response.end("Order Number: "+ GLOBAL.orderNum);
+		});
+	});
 }// makeDrink
 
 function image(response, postData, getData){
@@ -68,8 +62,6 @@ function recipes(response, postData, getData){
     console.log("Request handler 'recipes' was called.");
     
     process('cat ./webApp/recipes.html', function(error, stdout){
-        //console.log('stdout: ' + stdout);
-
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end(stdout);
     });// process
@@ -87,11 +79,9 @@ function getIngredients(response, postData, getData){
 function drinkQueue(response, postData, getData){
     console.log("Request handler 'drinkQueue' was called.");
 
-    process('ls ./Orders', function(error, stdout){
-	
-
-	response.writeHead(200, {'Content-Type': 'text/plain'});
-	response.end(stdout);
+    process('ls ../controller/Orders', function(error, stdout){
+		response.writeHead(200, {'Content-Type': 'text/plain'});
+		response.end(stdout);
     });// process
 }// drinkQueue
 
