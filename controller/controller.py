@@ -30,6 +30,34 @@ import serial
 import time
 import os
 
+orderDir = 'Orders'
+completedDir = 'OrdersCompleted'
+recipeDir = '../server/drinks/'
+serialDevice = '/dev/ttyACM0'
+baudRate = '115200'
+
+"""
+" Holds all data needed for 
+" each step for a specific 
+" drink.
+"""
+class step:
+	def __init__(self, code):
+		self.codeNum = code
+
+"""
+" Holds all the steps needed 
+" and commands for arduino to 
+" process each step.
+"""
+class order:
+	def __init__(self, drinkName):
+		self.drinkName = drinkName
+		self.steps = []
+
+	def addStep():
+		"""  """
+
 """
 " Checks the 'Orders' directory
 " and gets the next order within
@@ -37,32 +65,27 @@ import os
 "
 " @param: String <order directory>
 " 
-" @return: String <filename> on
-" success and String 'No Orders'
-" when no orders left and 'Error'
-" when error accurs.
+" @return: order object if there is 
+" another order in the queue else 
+" return null.
 """
-def getNextOrder(dir):
-    os.listdir(dir)
-    return
+def getNextOrder():
+	print os.listdir(orderDir)
+	return
 
 def main():
-    print 'Initializing Controller'
+	print 'Initializing Controller'
 
-    orderDir = 'Orders'
-    completedDir = 'OrdersCompleted'
-    serialDevice = '/dev/ttyACM0'
-    baudRate = '115200'
-    ser = serial.Serial(serialDevice, baudRate)
-    time.sleep(5)
-    ser.flush()
-    ser.flushInput()
-    ser.flushOutput()
+	ser = serial.Serial(serialDevice, baudRate)
+	time.sleep(5)
+	ser.flush()
+	ser.flushInput()
+	ser.flushOutput()
 
-    print 'Initialization Complete'
-    print
-    
-    
+	print 'Initialization Complete'
+	print
+
+	getNextOrder()
 
 if __name__ == '__main__':
-    main()
+	main()
