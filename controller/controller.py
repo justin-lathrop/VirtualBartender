@@ -31,8 +31,8 @@ import time
 import os
 import json
 
-orderDir = 'Orders'
-completedDir = 'OrdersCompleted'
+orderDir = './Orders'
+completedDir = './OrdersCompleted'
 serialDevice = '/dev/ttyACM0'
 baudRate = '115200'
 
