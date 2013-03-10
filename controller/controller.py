@@ -64,6 +64,7 @@ def markOrderComplete():
 		return True
 	return False
 
+
 """
 " Checks the 'Orders' directory
 " and gets the next order within
@@ -90,6 +91,7 @@ def getNextOrder():
 			time.sleep(5)
 	return json.load(open(orderDir + '/' + orders[0]))
 
+
 """
 " Fills the order of a drink and 
 " is in charge of sending commands 
@@ -102,10 +104,14 @@ def getNextOrder():
 " @return: True is successful and 
 " False by default if unsuccessful.
 """
-def fillOrder(order):
+def fillOrder(order, ser):
 	print 'Filling order <' + order + '>'
+	
+	#ser.write('A');
+	
 	time.sleep(3)
 	return True
+
 
 def main():
 	print 'Initializing Controller'
@@ -120,7 +126,7 @@ def main():
 	# Loop forever filling orders
 	while 1:
 		currentOrder = getNextOrder()
-		if fillOrder(currentOrder):
+		if fillOrder(currentOrder, ser):
 			markOrderComplete(currentOrder)
 			print 'Order complete'
 		else:
