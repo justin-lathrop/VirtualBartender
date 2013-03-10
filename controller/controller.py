@@ -58,7 +58,7 @@ def markOrderComplete():
 		
 		# Put current order into completed directory
 		newFile = open(completedDir + '/' + orderName, 'w')
-		newFile.write(orderContents)
+		newFile.write(json.dumps(orderContents))
 		newFile.close()
 		
 		return True
@@ -105,9 +105,11 @@ def getNextOrder():
 " False by default if unsuccessful.
 """
 def fillOrder(order, ser):
-	print 'Filling order <' + order + '>'
+	print 'Filling order <' + order['title'] + '>'
 	
-	#ser.write('A');
+	ser.write('A');
+	response = ser.read()
+        print 'response ' + response
 	
 	time.sleep(3)
 	return True
@@ -127,7 +129,7 @@ def main():
 	while 1:
 		currentOrder = getNextOrder()
 		if fillOrder(currentOrder, ser):
-			markOrderComplete(currentOrder)
+			markOrderComplete()
 			print 'Order complete'
 		else:
 			print 'Failed to make order'

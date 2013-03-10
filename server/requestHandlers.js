@@ -17,8 +17,12 @@ function makeDrink(response, postData, getData){
     
     GLOBAL.orderNum++;
 
-	process('cat ./webApp/drinks/' + getData['name'], function(error, stdout){
-		process('echo "'+ stdout +'" > ../controller/Orders/'+ GLOBAL.orderNum +'.order', function(error, stdout){
+	process('cat ./webApp/drinks/' + getData['name'] + '.js', function(error, stdout){
+		//var json = stdout;
+
+                //console.log('json = ' + json);
+                
+		process('echo \''+ stdout +'\' > ../controller/Orders/'+ GLOBAL.orderNum +'.js', function(error, stdout){
 		 console.log('Order sent');
 
 		 response.writeHead(200, {'Content-Type': 'text/plain'});
