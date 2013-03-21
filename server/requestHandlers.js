@@ -89,6 +89,31 @@ function drinkQueue(response, postData, getData){
     });// process
 }// drinkQueue
 
+function admin(response, postData, getData){
+    console.log("Request handler 'admin' was called.");
+
+    if(getData['command']){
+        process('touch ../controller/Admin/' + getData['command'] + '.command', function(error, stdout){
+            response.writeHead(200, {'Content-Type': 'text/plain'});
+            response.end("OK");
+        });// process
+    }else{
+        response.writeHead(200, {'Content-Type': 'text/html'});
+        var html = '<html><head><title>Admin Page</title></head>' +
+                   '<body>' +
+		   '<a href="/admin?command=Turn_Tray">Turn Tray</a>' +
+		   '<br /><br />' +
+		   '<a href="/admin?command=Mix_Drink">Mix Drink</a>' +
+		   '<br /><br />' +
+		   '<a href="/admin?command=Dispense_Drink_A">Dispense Drink A</a>' +
+		   '<br /><br />' +
+		   '<a href="/admin?command=Dispense_Drink_B">Dispense Drink B</a>' +
+		   '</body></html>';
+
+	response.end(html);
+    }
+}// admin
+
 exports.start = start;
 exports.makeDrink = makeDrink;
 exports.image = image;
@@ -97,3 +122,4 @@ exports.getIngredients = getIngredients;
 exports.drinkQueue = drinkQueue;
 exports.js = js;
 exports.css = css;
+exports.admin = admin;

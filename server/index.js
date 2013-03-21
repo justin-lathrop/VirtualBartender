@@ -12,13 +12,14 @@ handle["/getIngredients"] = requestHandlers.getIngredients;
 handle["/drinkQueue"] = requestHandlers.drinkQueue;
 handle["/js"] = requestHandlers.js;
 handle["/css"] = requestHandlers.css;
+handle["/admin"] = requestHandlers.admin;
 
 GLOBAL.orderNum = 0;
 
 process.on('SIGINT', function(){
 	console.log('\n\nCleaning up Server then shutting down.\n\n');
 
-	p('rm -f ../controller/Orders/*.order; rm -f ./OrdersCompleted/*.order', function(){});
+	p('rm -f ../controller/Orders/*.order; rm -f ../controller/Admin/*.command; rm -f ../controller/OrdersCompleted/*.order', function(){});
 
 	process.exit();
 });

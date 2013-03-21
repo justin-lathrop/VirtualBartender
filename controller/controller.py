@@ -3,8 +3,11 @@
 "
 " @param: Checks directory 'Orders' 
 " for list of drinks to make. Steps 
-" to make drink are in 'Recipes'
-" directory ('\n' delimmited).
+" to make drink are included inside
+" of drink order file in JSON format.
+" If Admin folder contains any
+" commands then they will be done
+" first.
 " Commnunicates to Arduino through
 " Serial and gets responses:
 "   Responses:
@@ -33,6 +36,7 @@ import json
 
 orderDir = './Orders'
 completedDir = './OrdersCompleted'
+adminDir = './Admin'
 serialDevice = '/dev/ttyACM0'
 baudRate = '115200'
 
@@ -81,15 +85,12 @@ def markOrderComplete():
 " return null.
 """
 def getNextOrder():
-	orders = []
-	while 1:
-		orders = os.listdir(orderDir)
-		if len(orders) > 0:
-			orders.sort()
-			break;
-		else:
-			time.sleep(5)
-	return json.load(open(orderDir + '/' + orders[0]))
+	orders = os.listdir(orderDir)
+	if len(orders) > 0:
+                orders.sort()
+                return json.load(open(orderDir + '/' + orders[0]))
+        else:
+                return False
 
 
 """
@@ -107,12 +108,59 @@ def getNextOrder():
 def fillOrder(order, ser):
 	print 'Filling order <' + order['title'] + '>'
 	
-	ser.write('A');
+	ser.write('A')
 	response = ser.read()
         print 'response ' + response
 	
 	time.sleep(3)
 	return True
+
+
+"""
+" Checks to see if there are any
+" admin commands to do.
+"
+" @return: True is folder is not
+" empty else False if it is.
+"""
+def admin():
+        commands = os.listdir(adminDir)
+        if len(commands) > 0:
+                return True
+        else:
+                return False
+
+"""
+" Speaks to arduino for admin
+" simply printing out what
+" the arduino responds with
+" for testing purposes.
+"""
+def fillAdminReq(ser):
+        commands = os.listdir(adminDir)
+        
+        for el in commands:
+                print 'Processing command ' + el
+                if el == 'Turn_Tray.command':
+                        ser.write('T')
+                        response = ser.read()
+                        print 'Arduino responded with ' + response
+                elif el == 'Mix_Drink.command':
+                        ser.write('M')
+                        response = ser.read()
+                        print 'Arduino responded with ' + response
+                elif el == 'Dispense_Drink_A.command':
+                        ser.write('A')
+                        response = ser.read()
+                        print 'Arduino responded with ' + response
+                elif el == 'Dispense_Drink_B.command':
+                        ser.write('B')
+                        response = ser.read()
+                        print 'Arduino responded with ' + response
+                else:
+                        print 'Command Unknown'
+
+                os.remove(adminDir + '/' + el)
 
 
 def main():
@@ -127,12 +175,16 @@ def main():
 
 	# Loop forever filling orders
 	while 1:
-		currentOrder = getNextOrder()
-		if fillOrder(currentOrder, ser):
-			markOrderComplete()
-			print 'Order complete'
-		else:
-			print 'Failed to make order'
+                if admin():
+                        fillAdminReq(ser)
+                else:
+                        currentOrder = getNextOrder()
+                        if currentOrder != False:
+                                if fillOrder(currentOrder, ser):
+                                        markOrderComplete()
+                                        print 'Order complete'
+                                else:
+                                        print 'Failed to make order'
 		time.sleep(2)
 	print 'Controller exited'
 
