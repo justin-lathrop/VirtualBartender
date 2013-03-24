@@ -23,19 +23,40 @@ void loop(){
     switch(input){
       case 'A':
         delay(2000);
-        if(rotateTray()){
-          success();
+        if(dispenseLiquid()){
+          Serial.print('A');
+          //success();
         }else{
           error();
         }
         break;
       case 'B':
         delay(2000);
-        if(dispenseLiquid(0, 0)){
-          success();
+        if(dispenseLiquid()){
+          Serial.print('B');
+          //success();
         }else{
           error();
         }
+        break;
+      case 'T':
+        delay(2000);
+        if(rotateTray()){
+          Serial.print('T');
+          //success();
+        }else{
+          error();
+        }
+        break;
+      case 'M':
+        delay(2000);
+        if(mixDrink()){
+          Serial.print('M');
+          //success();
+        }else{
+          error();
+        }
+        break;
       default:
         unknown();
         break;
@@ -43,6 +64,13 @@ void loop(){
     //Serial.println(input);
   }
 }
+
+/*
+ *
+ */
+ boolean mixDrink(){
+   return true;
+ }
 
 /*
  * Dispense Liquid into the 
@@ -55,7 +83,7 @@ void loop(){
  * @return: true is successful 
  * false if unsuccessful.
  */
- boolean dispenseLiquid(int liqNum, int servings){
+ boolean dispenseLiquid(/*int liqNum, int servings*/){
    return true;
  }
 
