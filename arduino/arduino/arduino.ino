@@ -24,7 +24,7 @@ char input = 0;
 //   360 / 1.8 = 200 steps
 const double stepDegree_tray = 1.8;
 const int stepsPerRevolution_tray = (int) 360 / stepDegree_tray;
-Stepper myStepper_tray(stepsPerRevolution_tray, 8, 9, 10, 11);
+Stepper myStepper_tray(stepsPerRevolution_tray, 9, 10, 11, 12);
 
 void steps_tray(int d, int n){
   myStepper_tray.step(n);
@@ -44,7 +44,7 @@ void moveTray(int n, int d){
 // Mixer
 const double stepDegree_mixer = 7.5;
 const int stepsPerRevolution = (int) 360 / stepDegree_mixer;
-Stepper myStepper_mixer(stepsPerRevolution_tray, 4, 5, 6, 7);
+Stepper myStepper_mixer(stepsPerRevolution_tray, 0, 1, 2, 3);
 
 void steps_mixer(int d, int n){
   myStepper_mixer.step(n);
