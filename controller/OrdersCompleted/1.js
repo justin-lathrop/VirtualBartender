@@ -1,1 +1,1 @@
-{"image": "image?name=Bartender.png", "drinkList": [{"amount": 8, "name": "Drink 1"}, {"amount": 4, "name": "Sprite"}], "alcoholPerc": "60%", "title": "Bushwacker"}
+{"image": "image?name=Bartender.png", "drinkList": [{"amount": 5, "name": "Grass"}, {"amount": 5, "name": "Hopper"}], "alcoholPerc": "0%", "title": "Grasshopper"}
