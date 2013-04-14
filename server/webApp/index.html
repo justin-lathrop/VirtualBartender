@@ -119,8 +119,8 @@
       </div><!-- header -->
       <div data-role="content">
         <center>
-            <h1>Welcome to the Virtual Bartender!</h1>
-            <img src="image?name=bartender_2.png" width="275px" height="325px" />
+            <h1>Welcome to the Vortex!</h1>
+            <img src="image?name=vortex.png" width="275px" height="325px" />
         </center>
       </div><!-- content -->
         <div data-role="footer" data-position="fixed">
@@ -166,8 +166,17 @@
         </div><!-- header -->
         <div data-role="content">
             <center>
-                <h1>Remember Your Order Number?</h1>
-                <ul id="drinkQueueList" data-role="listview"></ul>
+                <h1>Drink Queues</h1>
+                <ul id="drinkQueueList" data-role="listview" data-inset="true">
+			<li data-role="list-divider">Drinks in the queue</li>
+			<li>Drink A</li>
+			<li>Drink B</li>
+		</ul>
+		<ul style="margin-top: 20px;" id="drinkQueueFinished" data-role="listview" data-inset="true">
+			<li data-role="list-divider">Drinks finished</li>
+			<li>Drink 30</li>
+			<li>Drink 29</li>
+		</ul>
             <center>
         </div><!-- content -->
         <div data-role="footer" data-position="fixed">
