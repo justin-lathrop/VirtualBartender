@@ -1,24 +1,25 @@
 /*
 * @author: Justin Lathrop,
 *   Boreth Uy, Anthony
-*   Madrigul, Jeffrey
-*   Chen.
+ *   Madrigul, Jeffrey
+ *   Chen.
 *
-* @param: Reads input ASCII
-* character one by one from
-* Serial Port.
+ * @param: Reads input ASCII
+ * character one by one from
+ * Serial Port.
 *
-* @return: returns '1' for
-* success and '0' for failure
-* and '2' for unkown command
-* based on input command to
-* perform from Serial Port.
+ * @return: returns '1' for
+ * success and '0' for failure
+ * and '2' for unkown command
+ * based on input command to
+ * perform from Serial Port.
 */
 #include <Stepper.h>
-
+ 
+// Overall Program
 char input = 0;
  
-// Tray
+// Trayd
 // 1.8(degree) per step
 //   360 / 1.8 = 200 steps
 const double stepDegree_tray = 1.8;
@@ -67,7 +68,9 @@ void moveDown_mixer(int d){
 void setup(){
   myStepper_tray.setSpeed(10);
   myStepper_mixer.setSpeed(30);
-  pinMode(50, OUTPUT);
+  //pinMode(50, OUTPUT);
+  pinMode(7, INPUT);
+  digitalWrite(7, HIGH);
   Serial.begin(115200);
 }
  
@@ -85,7 +88,7 @@ void loop(){
         }
         break;
       case 'B':
-        if(dispenseLiquid()){
+        if(getButtonPress()){
           Serial.print('B');
           //success();
         }else{
@@ -115,10 +118,22 @@ void loop(){
     //Serial.println(input);
   }
 }
+
+/*
+ *
+ */
+boolean getButtonPress(){
+  while(1){
+    if(digitalRead(7) == LOW){ return true; }
+    delay(100);
+  }
+  
+  return true;
+}
  
 /*
-*
-*/
+ *
+ */
 boolean mixDrink(){
    moveUp_mixer(1000);
    moveDown_mixer(1000);
@@ -128,14 +143,14 @@ boolean mixDrink(){
  
 /*
 * Dispense Liquid into the
-* cup below it.
+ * cup below it.
 *
-* @param:
+ * @param:
 *    - int liquid number
 *    - int amount of servings
 *
-* @return: true is successful
-* false if unsuccessful.
+ * @return: true is successful
+ * false if unsuccessful.
 */
 boolean dispenseLiquid(/*int liqNum, int servings*/){
   
@@ -145,11 +160,11 @@ boolean dispenseLiquid(/*int liqNum, int servings*/){
 }
  
 /*
-* Rotate tray to next drink
-* position.
-*
-* @return: true if successful
-* false if unsuccessful.
+ * Rotate tray to next drink
+ * position.
+ *
+ * @return: true if successful
+ * false if unsuccessful.
 */
 boolean rotateTray(){
    moveTray(1, 1000);
@@ -158,25 +173,25 @@ boolean rotateTray(){
 }
  
 /*
-* Print error character
-* onto Serial Port.
+ * Print error character
+ * onto Serial Port.
 */
 void error(){
    Serial.print('0');
 }
  
-/*
-* Print success character
-* onto Serial Port.
+ /*
+ * Print success character
+ * onto Serial Port.
 */
 void success(){
    Serial.print('1');
 }
  
-/*
- * Print unknown character
- * onto Serial Port.
- */
- void unknown(){
-   Serial.print('2');
- }
+ /*
+  * Print unknown character
+  * onto Serial Port.
+  */
+  void unknown(){
+    Serial.print('2');
+  }
