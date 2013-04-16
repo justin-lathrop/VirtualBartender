@@ -1,34 +1,42 @@
 /*
-* @author: Justin Lathrop,
-*   Boreth Uy, Anthony
+ * @author: Justin Lathrop,
+ *   Boreth Uy, Anthony
  *   Madrigul, Jeffrey
  *   Chen.
-*
+ *
  * @param: Reads input ASCII
  * character one by one from
  * Serial Port.
-*
+ *  'L': Dispense Liquid
+ *   params: drink num, amount
+ *  'T': move tray
+ *    params: drink spots to move
+ *  'D': move down mixer
+ *  'U'; move up mixer
+ *
  * @return: returns '1' for
  * success and '0' for failure
  * and '2' for unkown command
  * based on input command to
- * perform from Serial Port.
-*/
+ * perform from Serial Port. 
+ * If there is an '!' that either 
+ * means the emergency stop has 
+ * begun or it has just happened.
+ */
 #include <Stepper.h>
 
 // Overall Program
 char input = 0;
-char drink = '0';
-char amount = '0';
-char traySpots = '0';
-volatile int emergState = HIGH;
-boolean STOP = true;
+char drink = 0;
+char amount = 0;
+char traySpots = 0;
+volatile boolean emergState = false;
+boolean started = false;
 const int MIXER_DISTANCE = 100;
 const int PIN_TRAY[4] = {9, 10, 11, 12};
 const int PIN_MIXER[4] = {15, 14, 17, 16};
 const int PIN_LIQUID[7] = {20, 21, 22, 23, 24, 
     25, 26};
-const int PIN_EMERG_BTN = 2;
 const int PIN_START_BTN = 7;
 
 // Trayd
@@ -107,7 +115,8 @@ void setup(){
   Serial.begin(115200);
   
   // Initialize hardware interrupts
-  attachInterrupt(PIN_EMERG_BTN, emergency, LOW);
+  digitalWrite(2, HIGH);
+  attachInterrupt(0, emergency, LOW);
 
   Serial.write("Starting");
   start();
@@ -115,59 +124,64 @@ void setup(){
 }
  
 void loop(){
-  drink = '0';
-  amount = '0';
-  traySpots = '0';
+  drink = 0;
+  amount = 0;
+  traySpots = 0;
 
-  if((Serial.available() > 0) && (STOP != false)){
-    input = Serial.read();
-   
-    switch(input){
-      case 'L':
-        drink = Serial.read();
-        amount = Serial.read();
-        if((drink != '0') && (amount != '0')){
-          if(dispenseLiquid(drink - '0', amount - '0')){
+  if(Serial.available() > 0){
+    if(emergState == false){
+      input = Serial.read();
+     
+      switch(input){
+        case 'L':
+          drink = (Serial.read() - '0');
+          amount = (Serial.read() - '0');
+          if((drink != 0) && (amount != 0)){
+            if(dispenseLiquid(drink, amount)){
+              success();
+            }else{
+              error();
+            }
+          }else{
+            error();
+          }
+          break;
+        case 'T':
+          traySpots = (Serial.read() - '0');
+          if(traySpots > 0){
+            if(rotateTray(traySpots)){
+              success();
+            }else{
+              error();
+            }
+          }else{
+            error();
+          }
+          break;
+        case 'D':
+          if(moveDown_mixer(MIXER_DISTANCE)){
             success();
           }else{
             error();
           }
-        }else{
-          error();
-        }
-        break;
-      case 'T':
-        traySpots = Serial.read();
-        if(traySpots - '0' > 0){
-          if(rotateTray(traySpots)){
+          break;
+        case 'U':
+          if(moveUp_mixer(MIXER_DISTANCE)){
             success();
           }else{
             error();
           }
-        }else{
-          error();
-        }
-        break;
-      case 'D':
-        if(moveDown_mixer(MIXER_DISTANCE)){
-          success();
-        }else{
-          error();
-        }
-        break;
-      case 'U':
-        if(moveUp_mixer(MIXER_DISTANCE)){
-          success();
-        }else{
-          error();
-        }
-        break;
-      default:
-        unknown();
-        break;
-    };
-    //Serial.println(input);
-  }
+          break;
+        default:
+          unknown();
+          break;
+      };
+      //Serial.println(input);
+    }else{
+      Serial.write('!');
+      start();
+    }
+  }// if
 }
 
 /*
@@ -175,34 +189,37 @@ void loop(){
  * will send pause signal to 
  * controller over Serial and 
  * stop after current step.
+ * 
+ * This is done by setting 
+ * the 'emergState' variable 
+ * to boolean true.
  */
 void emergency(){
-  Serial.write('!');
-  STOP = true;
-  start();
+  emergState = true;
 }
 
 /*
  * After emergency interrupt 
- * will wait until start button 
- * is pressed.  After pressed 
- * will send to controller to 
- * start the current process 
- * again.
+ * or start, will wait until 
+ * start button is pressed. 
+ * After pressed will send to 
+ * controller to start the 
+ * current process again.
  */
 void start(){
   while(1){
     if(digitalRead(PIN_START_BTN) == LOW){
-      STOP = false;
-      Serial.write('!');
+      emergState = false;
+      if(started){ Serial.write('!'); }
+      started = true;
       break;
     }
-    delay(50);
+    delay(10);
   }
 }
 
 /*
- * Dispense Liquid into the
+ * Dispense liquid into the
  * cup below it.  Liquid 
  * number is the pin from 
  * drink left to right 
@@ -220,7 +237,7 @@ boolean dispenseLiquid(int liquid, int servings){
   int time = 0;
 
   if((liquid >= 1) && (amount >= 1)){
-    // Calculate time given amount
+    // Calculate time given serving amount
     
 
     digitalWrite(PIN_LIQUID[liquid], HIGH);
@@ -236,9 +253,12 @@ boolean dispenseLiquid(int liquid, int servings){
  * Rotate tray to next drink
  * position.
  *
+ * @params:
+ *   - int spots
+ *
  * @return: true if successful
  * false if unsuccessful.
-*/
+ */
 boolean rotateTray(int spots){
    moveTray(spots, 0);
    return true;
@@ -247,7 +267,7 @@ boolean rotateTray(int spots){
 /*
  * Print error character
  * onto Serial Port.
-*/
+ */
 void error(){
    Serial.print('0');
 }
@@ -255,7 +275,7 @@ void error(){
  /*
  * Print success character
  * onto Serial Port.
-*/
+ */
 void success(){
    Serial.print('1');
 }
