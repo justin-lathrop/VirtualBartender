@@ -9,16 +9,19 @@
 " commands then they will be done
 " first.
 " Commnunicates to Arduino through
-" Serial and gets responses:
+" Serial:
 "   Responses:
-"       - '0' => error
-"       - '1' => success
-"       - '2' => unknown command
+"       - '0' => Error
+"       - '1' => Success
+"       - '2' => Unknown command
+"       - '!' => Emergency (stop)
 "   Commands:
-"       - 'A' => Rotate Tray
-"       - 'B' => Dispense Liquid <number>
-"       - 'C' => Dispense Liquid <number>
-"       - ...
+"       - 'L' => Dispense Liquid
+"           <liquid number> <servings>
+"       - 'T' => Move Tray
+"           <number of spots to move>
+"       - 'D' => Move down mixer
+"       - 'U' => Move up mixer
 " When order is completed the drink
 " item will be erased from 'Orders'
 " directory and put into the 'Finished'
@@ -27,6 +30,7 @@
 " @return:
 "   - errors => stdout
 "   - other => stdout
+"   - logging => logs.log (current dir)
 """
 
 import serial
@@ -72,17 +76,11 @@ def markOrderComplete():
 """
 " Checks the 'Orders' directory
 " and gets the next order within
-" it.  If no orders are found 
-" then it will wait until an 
-" order is filled.  Will check 
-" periodically (5 seconds) until 
-" an order is placed.
+" it.
 "
-" @param: String <order directory>
-" 
 " @return: order object if there is 
 " another order in the queue else 
-" return null.
+" return False.
 """
 def getNextOrder():
 	orders = os.listdir(orderDir)
@@ -100,7 +98,9 @@ def getNextOrder():
 " 
 " @param: Order <order> which holds 
 " all of the drinks information 
-" needed to create it.
+" needed to create it. Serial
+" reference in order to commuincate
+" to the Arduino.
 " 
 " @return: True is successful and 
 " False by default if unsuccessful.
@@ -170,6 +170,11 @@ def main():
 	ser.flush()
 	ser.flushInput()
 	ser.flushOutput()
+
+        # Wait until start button is pressed
+        while ser.read() != '!':
+            time.sleep(2)
+
 	print 'Initialization Complete'
 	print
 

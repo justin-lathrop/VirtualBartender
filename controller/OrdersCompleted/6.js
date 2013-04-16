@@ -1,1 +1,0 @@
-{"image": "image?name=Bartender.png", "drinkList": [{"amount": 0, "name": "No Drinks"}], "alcoholPerc": "-10%", "title": "Irish Car Bomb"}
