@@ -13,6 +13,7 @@
  *    params: drink spots to move
  *  'D': move down mixer
  *  'U'; move up mixer
+ *  'B': wait for start button
  *
  * @return: returns '1' for
  * success and '0' for failure
@@ -91,9 +92,6 @@ void setup(){
   myStepper_tray.setSpeed(10);
   myStepper_mixer.setSpeed(30);
 
-  pinMode(PIN_EMERG_BTN, INPUT);
-  digitalWrite(PIN_EMERG_BTN, HIGH);
-
   pinMode(PIN_START_BTN, INPUT);
   digitalWrite(PIN_START_BTN, HIGH);
 
@@ -171,6 +169,9 @@ void loop(){
           }else{
             error();
           }
+          break;
+        case 'B':
+          start();
           break;
         default:
           unknown();

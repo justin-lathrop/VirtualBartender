@@ -22,6 +22,7 @@
 "           <number of spots to move>
 "       - 'D' => Move down mixer
 "       - 'U' => Move up mixer
+"       - 'B' => Wait for start button
 " When order is completed the drink
 " item will be erased from 'Orders'
 " directory and put into the 'Finished'
@@ -43,155 +44,222 @@ completedDir = './OrdersCompleted'
 adminDir = './Admin'
 serialDevice = '/dev/ttyACM0'
 baudRate = '115200'
+drinks = {'A': '0', 'B': '1', 'C': '2',
+          'D': '3', 'E': '4', 'F': '5',
+          'G': '6'}
 
-"""
-" Marks current order as complete 
-" by removing it from the orderDir 
-" and appending it inside the 
-" completedDir.
-" 
-" @return: True if success and 
-" False if error.
-"""
+
 def markOrderComplete():
-	orders = os.listdir(orderDir)
-	if len(orders) > 0:
-		# Save the current order
-		orders.sort()
-		orderName = orders[0]
-		orderContents = json.load(open(orderDir + '/' + orders[0]))
-		
-		# Delete current order from order directory
-		os.remove(orderDir + '/' + orderName)
-		
-		# Put current order into completed directory
-		newFile = open(completedDir + '/' + orderName, 'w')
-		newFile.write(json.dumps(orderContents))
-		newFile.close()
-		
-		return True
-	return False
+    """
+    " Marks current order as complete 
+    " by removing it from the orderDir 
+    " and appending it inside the 
+    " completedDir.
+    " 
+    " @return: True if success and 
+    " False if error.
+    """
+    orders = os.listdir(orderDir)
+    if len(orders) > 0:
+        # Save the current order
+        orders.sort()
+        orderName = orders[0]
+        orderContents = json.load(open(orderDir + '/' + orders[0]))
+
+	# Delete current order from order directory
+        os.remove(orderDir + '/' + orderName)
+
+	# Put current order into completed directory
+        newFile = open(completedDir + '/' + orderName, 'w')
+        newFile.write(json.dumps(orderContents))
+        newFile.close()
+
+        return True
+    return False
 
 
-"""
-" Checks the 'Orders' directory
-" and gets the next order within
-" it.
-"
-" @return: order object if there is 
-" another order in the queue else 
-" return False.
-"""
 def getNextOrder():
-	orders = os.listdir(orderDir)
-	if len(orders) > 0:
-                orders.sort()
-                return json.load(open(orderDir + '/' + orders[0]))
-        else:
-                return False
+    """
+    " Checks the 'Orders' directory
+    " and gets the next order within
+    " it.
+    "
+    " @return: order object if there is 
+    " another order in the queue else 
+    " return False.
+    """
+    orders = os.listdir(orderDir)
+    if len(orders) > 0:
+        orders.sort()
+        return json.load(open(orderDir + '/' + orders[0]))
+    else:
+        return False
 
 
-"""
-" Fills the order of a drink and 
-" is in charge of sending commands 
-" to Arduino to process.
-" 
-" @param: Order <order> which holds 
-" all of the drinks information 
-" needed to create it. Serial
-" reference in order to commuincate
-" to the Arduino.
-" 
-" @return: True is successful and 
-" False by default if unsuccessful.
-"""
 def fillOrder(order, ser):
-	print 'Filling order <' + order['title'] + '>'
-	
-	ser.write('A')
-	response = ser.read()
-        print 'response ' + response
-	
-	time.sleep(3)
-	return True
+    """
+    " Fills the order of a drink and 
+    " is in charge of sending commands 
+    " to Arduino to process.
+    " 
+    " @param: Order <order> which holds 
+    " all of the drinks information 
+    " needed to create it. Serial
+    " reference in order to commuincate
+    " to the Arduino.
+    " 
+    " @return: True is successful and 
+    " False if unsuccessful.
+    """
+    print 'Filling order <' + order['title'] + '>'
 
-
-"""
-" Checks to see if there are any
-" admin commands to do.
-"
-" @return: True is folder is not
-" empty else False if it is.
-"""
-def admin():
-        commands = os.listdir(adminDir)
-        if len(commands) > 0:
-                return True
-        else:
-                return False
-
-"""
-" Speaks to arduino for admin
-" simply printing out what
-" the arduino responds with
-" for testing purposes.
-"""
-def fillAdminReq(ser):
-        commands = os.listdir(adminDir)
+    # Loop through all drinks in list
+    for d in order['drinkList']:
+        ser.write('L')
+        ser.write(drinks[ d['name'] ])
+        ser.write(d['amount'])
         
-        for el in commands:
-                print 'Processing command ' + el
-                if el == 'Turn_Tray.command':
-                        ser.write('T')
-                        response = ser.read()
-                        print 'Arduino responded with ' + response
-                elif el == 'Mix_Drink.command':
-                        ser.write('M')
-                        response = ser.read()
-                        print 'Arduino responded with ' + response
-                elif el == 'Dispense_Drink_A.command':
-                        ser.write('A')
-                        response = ser.read()
-                        print 'Arduino responded with ' + response
-                elif el == 'Dispense_Drink_B.command':
-                        ser.write('B')
-                        response = ser.read()
-                        print 'Arduino responded with ' + response
-                else:
-                        print 'Command Unknown'
+        print "Command Arduino to:"
+        print "> Dispense Liquid " + d['name']
+        print "> Amount " + d['amount']
 
-                os.remove(adminDir + '/' + el)
+        serIn = ser.read()
 
+        print "Arduino Response:"
+        print "> " + serIn
+        print
+        print
+
+    # Turn tray to next position
+    print "Command Arduino to:"
+    print "> Move tray 1 position"
+
+    ser.write('T')
+    ser.write('1')
+    serIn = ser.read()
+
+    print "Arduino Response:"
+    print "> " + serIn
+    print
+    print
+
+    return True
+
+
+def admin():
+    """
+    " Checks to see if there are any
+    " admin commands to do.
+    "
+    " @return: True is folder is not
+    " empty else False if it is.
+    """
+    commands = os.listdir(adminDir)
+    if len(commands) > 0:
+        return True
+    else:
+        return False
+
+
+def fillAdminReq(ser):
+    """
+    " Speaks to arduino for admin
+    " simply printing out what
+    " the arduino responds with
+    " for testing purposes.
+    """
+    commands = os.listdir(adminDir)
+        
+    for el in commands:
+        print 'Processing command ' + el
+        if el == 'Turn_Tray.command':
+            ser.write('T')
+            response = ser.read()
+            print 'Arduino responded with ' + response
+        elif el == 'Mix_Drink.command':
+            ser.write('M')
+            response = ser.read()
+            print 'Arduino responded with ' + response
+        elif el == 'Dispense_Drink_A.command':
+            ser.write('A')
+            response = ser.read()
+            print 'Arduino responded with ' + response
+        elif el == 'Dispense_Drink_B.command':
+            ser.write('B')
+            response = ser.read()
+            print 'Arduino responded with ' + response
+        else:
+            print 'Command Unknown'
+
+        os.remove(adminDir + '/' + el)
+
+
+def readSerial(ser):
+    """
+    " Reads serial input
+    " from the Arduino and then
+    " checks the input for errors
+    " or an emergency state.  If
+    " emergency state occurs then
+    " abort current drink and wait
+    " for emergency state to end.
+    "
+    " @param: configured Serial obj
+    "
+    " @return: input char
+    """
+    while 1:
+        serIn = ser.read()
+
+        if serIn == '!':
+           time.sleep(2)
+        else:
+            return serIn
 
 def main():
-	print 'Initializing Controller'
-	ser = serial.Serial(serialDevice, baudRate)
-	time.sleep(5)
-	ser.flush()
-	ser.flushInput()
-	ser.flushOutput()
+    print 'Initializing Controller'
+    numDrinks = 0
+    ser = serial.Serial(serialDevice, baudRate)
+    time.sleep(5)
+    ser.flush()
+    ser.flushInput()
+    ser.flushOutput()
 
-        # Wait until start button is pressed
-        while ser.read() != '!':
-            time.sleep(2)
+    # Wait until start button is pressed
+    while ser.read() != '!':
+        time.sleep(2)
 
-	print 'Initialization Complete'
-	print
+    print 'Initialization Complete'
+    print
 
-	# Loop forever filling orders
-	while 1:
-                if admin():
-                        fillAdminReq(ser)
+    # Loop forever filling orders
+    while 1:
+        if admin():
+            fillAdminReq(ser)
+        else:
+            currentOrder = getNextOrder()
+            if currentOrder != False:
+                if fillOrder(currentOrder, ser):
+                    markOrderComplete()
+                    numDrinks++
+                    print '\n\nOrder complete\n\n'
                 else:
-                        currentOrder = getNextOrder()
-                        if currentOrder != False:
-                                if fillOrder(currentOrder, ser):
-                                        markOrderComplete()
-                                        print 'Order complete'
-                                else:
-                                        print 'Failed to make order'
-		time.sleep(2)
-	print 'Controller exited'
+                    print '\n\nFailed to make order\n\n'
+        if numDrinks >= 6:
+            print "Six drinks have been made"
+            print "Command Arduino to:"
+            print "> Get start button press"
+            ser.write('B')
+            serIn = ser.read()
+            if serIn == '1':
+                print "Arduino Response:"
+                print "> " + serIn
+                numDrinks = 0
+                print "\nDrink count zeroed out\n"
+            else:
+                print "\n\nError getting user button press\n\n"
+        time.sleep(2)
+    print '\n\nController exited\n\n'
 
 if __name__ == '__main__':
-	main()
+    main()
