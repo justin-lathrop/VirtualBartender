@@ -44,9 +44,9 @@ completedDir = './OrdersCompleted'
 adminDir = './Admin'
 serialDevice = '/dev/ttyACM0'
 baudRate = '115200'
-drinks = {'A': '0', 'B': '1', 'C': '2',
-          'D': '3', 'E': '4', 'F': '5',
-          'G': '6'}
+drinks = {"A": '0', "B": '1', "C": '2',
+          "D": '3', "E": '4', "F": '5',
+          "G": '6'}
 
 
 def markOrderComplete():
@@ -116,8 +116,12 @@ def fillOrder(order, ser):
     # Loop through all drinks in list
     for d in order['drinkList']:
         ser.write('L')
+        print 'L,'
         ser.write(drinks[ d['name'] ])
+        print drinks[ d['name'] ] + ','
         ser.write(d['amount'])
+        print d['amount']
+        print
         
         print "Command Arduino to:"
         print "> Dispense Liquid " + d['name']
@@ -228,6 +232,10 @@ def main():
     # Wait until start button is pressed
     while ser.read() != '!':
         time.sleep(2)
+    
+    ser.flush()
+    ser.flushInput()
+    ser.flushOutput()
 
     print 'Initialization Complete'
     print
@@ -241,7 +249,7 @@ def main():
             if currentOrder != False:
                 if fillOrder(currentOrder, ser):
                     markOrderComplete()
-                    numDrinks++
+                    numDrinks = numDrinks + 1
                     print '\n\nOrder complete\n\n'
                 else:
                     print '\n\nFailed to make order\n\n'

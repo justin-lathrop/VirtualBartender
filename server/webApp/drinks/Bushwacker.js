@@ -3,12 +3,16 @@
     "image": "image?name=Bartender.png",
     "drinkList": [
         {
-	    "name": "Drink 1",
-	    "amount": 8
+	    "name": "A",
+	    "amount": "8"
 	},
 	{
-	    "name": "Sprite",
-	    "amount": 4
+	    "name": "B",
+	    "amount": "4"
+	},
+	{
+	    "name": "C",
+	    "amount": "1"
 	}
     ],
     "alcoholPerc": "60%"
