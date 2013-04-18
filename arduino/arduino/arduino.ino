@@ -28,9 +28,9 @@
 
 // Overall Program
 char input = 0;
-char drink = 0;
-char amount = 0;
-char traySpots = 0;
+int drink = 0;
+int amount = 0;
+int traySpots = 0;
 volatile boolean emergState = false;
 boolean started = false;
 const int MIXER_DISTANCE = 100;
@@ -113,15 +113,21 @@ void setup(){
   Serial.begin(115200);
   
   // Initialize hardware interrupts
+  pinMode(2, INPUT);
   digitalWrite(2, HIGH);
-  attachInterrupt(0, emergency, LOW);
+  //attachInterrupt(0, emergency, LOW);
 
-  Serial.write("Starting");
+  //Serial.write("Starting");
   start();
-  Serial.write("Started");
+  //Serial.write("Started");
 }
  
 void loop(){
+  if(digitalRead(2) == LOW){
+    Serial.write('!');
+    start();
+  }
+
   drink = 0;
   amount = 0;
   traySpots = 0;
@@ -132,9 +138,9 @@ void loop(){
      
       switch(input){
         case 'L':
-          drink = (Serial.read() - '0');
-          amount = (Serial.read() - '0');
-          if((drink != 0) && (amount != 0)){
+          drink = getInt();
+          amount = getInt();
+          if((drink < 7) && (amount != 0)){
             if(dispenseLiquid(drink, amount)){
               success();
             }else{
@@ -145,10 +151,11 @@ void loop(){
           }
           break;
         case 'T':
-          traySpots = (Serial.read() - '0');
+          traySpots = getInt();
+          //Serial.write(traySpots);
           if(traySpots > 0){
             if(rotateTray(traySpots)){
-              success();
+              success(); 
             }else{
               error();
             }
@@ -172,6 +179,7 @@ void loop(){
           break;
         case 'B':
           start();
+          success();
           break;
         default:
           unknown();
@@ -179,10 +187,29 @@ void loop(){
       };
       //Serial.println(input);
     }else{
-      Serial.write('!');
+      //Serial.write('!');
       start();
     }
   }// if
+}
+
+/*
+ * Wait for serial input 
+ * then parse byte into a 
+ * integer.
+ * 
+ * @return: Serial input integer
+ */
+int getInt(){
+  int in = 0;
+  while(1){
+    if(Serial.available() > 0){
+      in = (Serial.read() - '0');
+      break;
+    }
+    delay(10);
+  }
+  return(in);
 }
 
 /*
@@ -211,7 +238,8 @@ void start(){
   while(1){
     if(digitalRead(PIN_START_BTN) == LOW){
       emergState = false;
-      if(started){ Serial.write('!'); }
+      if(!started){ Serial.write('!'); }
+      //Serial.write('!');
       started = true;
       break;
     }
@@ -237,7 +265,7 @@ void start(){
 boolean dispenseLiquid(int liquid, int servings){
   int time = 0;
 
-  if((liquid >= 1) && (amount >= 1)){
+  if((liquid >= 0) && (amount >= 1)){
     // Calculate time given serving amount
     
 
@@ -288,3 +316,4 @@ void success(){
   void unknown(){
     Serial.print('2');
   }
+
