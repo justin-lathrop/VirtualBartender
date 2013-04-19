@@ -3,12 +3,12 @@
 	"image": "image?name=Bartender.png",
 	"drinkList": [
 		{
-			"name": "Car",
-			"amount": 1
+			"name": "A",
+			"amount": "2"
 		},
 		{
-			"name": "Bomb",
-			"amount": 1
+			"name": "B",
+			"amount": "1"
 		}
 	],
 	"alcoholPerc": "0%"

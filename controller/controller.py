@@ -70,7 +70,7 @@ def markOrderComplete():
         os.remove(orderDir + '/' + orderName)
 
 	# Put current order into completed directory
-        newFile = open(completedDir + '/' + orderName, 'w')
+        newFile = open(completedDir + '/' + time.time() + '_' + orderName, 'w')
         newFile.write(json.dumps(orderContents))
         newFile.close()
 
@@ -231,7 +231,7 @@ def main():
 
     # Wait until start button is pressed
     while ser.read() != '!':
-        time.sleep(2)
+        time.sleep(0.5)
     
     ser.flush()
     ser.flushInput()

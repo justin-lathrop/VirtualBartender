@@ -36,8 +36,8 @@ boolean started = false;
 const int MIXER_DISTANCE = 100;
 const int PIN_TRAY[4] = {9, 10, 11, 12};
 const int PIN_MIXER[4] = {15, 14, 17, 16};
-const int PIN_LIQUID[7] = {20, 21, 22, 23, 24, 
-    25, 26};
+const int PIN_LIQUID[7] = {14, 15, 16, 17, 18, 
+    19, 20};
 const int PIN_START_BTN = 7;
 
 // Trayd
@@ -95,6 +95,7 @@ void setup(){
   pinMode(PIN_START_BTN, INPUT);
   digitalWrite(PIN_START_BTN, HIGH);
 
+  pinMode(14, OUTPUT);
   pinMode(PIN_LIQUID[0], OUTPUT);
   pinMode(PIN_LIQUID[1], OUTPUT);
   pinMode(PIN_LIQUID[2], OUTPUT);
@@ -264,13 +265,19 @@ void start(){
  */
 boolean dispenseLiquid(int liquid, int servings){
   int time = 0;
+  int servingSize = 44;
+  double servingSpeed = 12.5;
 
   if((liquid >= 0) && (amount >= 1)){
     // Calculate time given serving amount
-    
+    // Only serve max of 250ml
+    // One serving = 44ml
+    // Dispensors speed is 12.5 servings/second
+    time = ((amount * servingSize) / servingSize);
 
     digitalWrite(PIN_LIQUID[liquid], HIGH);
-    delay(time);
+    delay(time * 1000);
+    digitalWrite(PIN_LIQUID[liquid], LOW);
   }else{
     return false;
   }

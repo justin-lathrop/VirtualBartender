@@ -3,12 +3,12 @@
 	"image": "image?name=Bartender.png",
 	"drinkList": [
 		{
-			"name": "Jack Daniels",
-			"amount": 5
+			"name": "D",
+			"amount": "1"
 		},
 		{
-			"name": "Coca Cola",
-			"amount": 5
+			"name": "C",
+			"amount": "1"
 		}
 	],
 	"alcoholPerc": "70%"

@@ -3,12 +3,12 @@
 	"image": "image?name=Bartender.png",
 	"drinkList": [
 		{
-			"name": "Mud",
-			"amount": 20
+			"name": "A",
+			"amount": "1"
 		},
 		{
-			"name": "Slide",
-			"amount": 1
+			"name": "B",
+			"amount": "1"
 		}
 	],
 	"alcoholPerc": "0%"
