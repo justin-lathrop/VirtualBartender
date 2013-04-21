@@ -71,7 +71,7 @@ def markOrderComplete():
         os.remove(orderDir + '/' + orderName)
 
 	# Put current order into completed directory
-        newFile = open(completedDir + '/' + time.time() + '_' + orderName, 'w')
+        newFile = open(completedDir + '/' + str(time.time()) + '_' + orderName, 'w')
         newFile.write(json.dumps(orderContents))
         newFile.close()
 
