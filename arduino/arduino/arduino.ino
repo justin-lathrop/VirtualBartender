@@ -35,9 +35,8 @@ volatile boolean emergState = false;
 boolean started = false;
 const int MIXER_DISTANCE = 100;
 const int PIN_TRAY[4] = {9, 10, 11, 12};
-const int PIN_MIXER[4] = {15, 14, 17, 16};
-const int PIN_LIQUID[7] = {14, 15, 16, 17, 18, 
-    19, 20};
+//const int PIN_MIXER[4] = {15, 14, 17, 16};
+const int PIN_LIQUID[7] = {41, 43, 45, 47, 49, 51, 50};
 const int PIN_START_BTN = 7;
 
 // Trayd
@@ -46,12 +45,12 @@ const int PIN_START_BTN = 7;
 const double stepDegree_tray = 1.8;
 const int stepsPerRevolution_tray = (int) 360 / stepDegree_tray;
 Stepper myStepper_tray(stepsPerRevolution_tray, PIN_TRAY[0], PIN_TRAY[1], PIN_TRAY[2], PIN_TRAY[3]);
- 
+
 void steps_tray(int d, int n){
   myStepper_tray.step(n);
   delay(d);
 }
- 
+
 void degreeStep_tray(double deg, int d){
   int nStep = (int) deg / stepDegree_tray;
   steps_tray(d, nStep);
@@ -63,7 +62,43 @@ void moveTray(int n, int d){
 }
  
 // Mixer
-const double stepDegree_mixer = 7.5;
+const int mixerTop = 26; // cm
+const int mixerBottom = 14; // cm
+int mixerDistancePin = A0;
+int mixerOnPin = 0;
+int mixerOffPin = 0;
+
+boolean moveMixerUp(){
+  int sensorValue = 0;
+
+  while(sensorValue <= mixerTop){
+    sensorValue = (4800 / (analogRead(mixerDistancePin) - 20));
+  }
+  
+  return true;
+}
+
+boolean moveMixerDown(){
+  int sensorValue = 50;
+
+  while(sensorValue >= mixerBottom){
+    sensorValue = (4800 / (analogRead(mixerDistancePin) - 20));
+  }
+
+  return true;
+}
+
+boolean turnOnMixer(){
+  digitalWrite(mixerOnPin, HIGH);
+  digitalWrite(mixerOffPin, LOW);
+}
+
+boolean turnOffMixer(){
+  digitalWrite(mixerOnPin, LOW);
+  digitalWrite(mixerOffPin, HIGH);
+}
+
+/*const double stepDegree_mixer = 7.5;
 const int stepsPerRevolution_mixer = (int) 360 / stepDegree_mixer;
 Stepper myStepper_mixer(stepsPerRevolution_mixer, PIN_MIXER[0], PIN_MIXER[1], PIN_MIXER[2], PIN_MIXER[3]);
  
@@ -85,16 +120,19 @@ boolean moveUp_mixer(int d){
 boolean moveDown_mixer(int d){
   degreeStep_mixer(300, d);
   return true;
-}
+}*/
  
 // Main Program
 void setup(){
+  // Set up motor speeds
   myStepper_tray.setSpeed(10);
-  myStepper_mixer.setSpeed(30);
+  //myStepper_mixer.setSpeed(30);
 
+  // Set up buttons
   pinMode(PIN_START_BTN, INPUT);
   digitalWrite(PIN_START_BTN, HIGH);
 
+  // Set up dispensor pins
   pinMode(14, OUTPUT);
   pinMode(PIN_LIQUID[0], OUTPUT);
   pinMode(PIN_LIQUID[1], OUTPUT);
@@ -111,6 +149,13 @@ void setup(){
   digitalWrite(PIN_LIQUID[5], LOW);
   digitalWrite(PIN_LIQUID[6], LOW);
 
+  // Set up mixer pins, initialized to off
+  pinMode(mixerOnPin, OUTPUT);
+  pinMode(mixerOffPin, OUTPUT);
+  digitalWrite(mixerOnPin, LOW);
+  digitalWrite(mixerOffPin, HIGH);
+
+  // Begin listening on serial
   Serial.begin(115200);
   
   // Initialize hardware interrupts
@@ -118,9 +163,8 @@ void setup(){
   digitalWrite(2, HIGH);
   //attachInterrupt(0, emergency, LOW);
 
-  //Serial.write("Starting");
+  // Wait for "start" button to be pressed
   start();
-  //Serial.write("Started");
 }
  
 void loop(){
@@ -165,14 +209,14 @@ void loop(){
           }
           break;
         case 'D':
-          if(moveDown_mixer(MIXER_DISTANCE)){
+          if(true/*moveDown_mixer(MIXER_DISTANCE)*/){
             success();
           }else{
             error();
           }
           break;
         case 'U':
-          if(moveUp_mixer(MIXER_DISTANCE)){
+          if(true/*moveUp_mixer(MIXER_DISTANCE)*/){
             success();
           }else{
             error();
@@ -240,7 +284,6 @@ void start(){
     if(digitalRead(PIN_START_BTN) == LOW){
       emergState = false;
       if(!started){ Serial.write('!'); }
-      //Serial.write('!');
       started = true;
       break;
     }
@@ -264,6 +307,15 @@ void start(){
  * false if unsuccessful.
  */
 boolean dispenseLiquid(int liquid, int servings){
+  int i = 0;
+  for(i = 0; i < 7; i++){
+    Serial.println(PIN_LIQUID[i]);
+    digitalWrite(PIN_LIQUID[i], HIGH);
+    delay(5000);
+    digitalWrite(PIN_LIQUID[i], LOW);
+    delay(5000);
+  }
+
   int time = 0;
   int servingSize = 44;
   double servingSpeed = 12.5;
@@ -284,7 +336,7 @@ boolean dispenseLiquid(int liquid, int servings){
 
   return true;
 }
- 
+
 /*
  * Rotate tray to next drink
  * position.

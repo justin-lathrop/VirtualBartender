@@ -7,7 +7,10 @@ void setup() {
 
 void loop() {
   //sensorValue = 9462 / (analogRead(sensorPin) - 16.92);
-  sensorValue = 4800 / (analogRead(sensorPin) - 20);
+  int anal = analogRead(sensorPin);
+  sensorValue = 4800 / (anal - 20);
   Serial.println(sensorValue);
-  delay(500);       
+  Serial.println(anal);
+  Serial.println("=====");
+  delay(2000);       
 }
