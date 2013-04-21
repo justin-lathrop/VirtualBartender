@@ -26,7 +26,8 @@
 " When order is completed the drink
 " item will be erased from 'Orders'
 " directory and put into the 'Finished'
-" directory.
+" directory, then controller will wait
+" until arduino start button is pressed.
 " 
 " @return:
 "   - errors => stdout
@@ -249,11 +250,17 @@ def main():
             if currentOrder != False:
                 if fillOrder(currentOrder, ser):
                     markOrderComplete()
-                    numDrinks = numDrinks + 1
+                    
+                    #numDrinks = numDrinks + 1
                     print '\n\nOrder complete\n\n'
+
+                    # Get confirmation to start next drink
+                    ser.write('B');
+                    while ser.read() != '!':
+                        time.sleep(0.5
                 else:
                     print '\n\nFailed to make order\n\n'
-        if numDrinks >= 6:
+        """if numDrinks >= 6:
             print "Six drinks have been made"
             print "Command Arduino to:"
             print "> Get start button press"
@@ -265,7 +272,7 @@ def main():
                 numDrinks = 0
                 print "\nDrink count zeroed out\n"
             else:
-                print "\n\nError getting user button press\n\n"
+                print "\n\nError getting user button press\n\n""""
         time.sleep(2)
     print '\n\nController exited\n\n'
 
