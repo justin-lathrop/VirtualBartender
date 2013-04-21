@@ -255,7 +255,7 @@ def main():
                     print '\n\nOrder complete\n\n'
 
                     # Get confirmation to start next drink
-                    ser.write('B');
+                    ser.write('B')
                     while ser.read() != '!':
                         time.sleep(0.5
                 else:
