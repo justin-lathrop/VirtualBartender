@@ -71,7 +71,7 @@ def markOrderComplete():
         os.remove(orderDir + '/' + orderName)
 
 	# Put current order into completed directory
-        newFile = open(completedDir + '/' + time.time() + '_' + orderName, 'w')
+        newFile = open(completedDir + '/' + str(time.time()) + '_' + orderName, 'w')
         newFile.write(json.dumps(orderContents))
         newFile.close()
 
@@ -257,7 +257,7 @@ def main():
                     # Get confirmation to start next drink
                     ser.write('B')
                     while ser.read() != '!':
-                        time.sleep(0.5
+                        time.sleep(0.5)
                 else:
                     print '\n\nFailed to make order\n\n'
         """if numDrinks >= 6:
@@ -272,7 +272,7 @@ def main():
                 numDrinks = 0
                 print "\nDrink count zeroed out\n"
             else:
-                print "\n\nError getting user button press\n\n""""
+                print "\n\nError getting user button press\n\n"""
         time.sleep(2)
     print '\n\nController exited\n\n'
 
