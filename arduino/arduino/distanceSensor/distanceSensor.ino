@@ -1,16 +1,24 @@
-int sensorPin = A0;
+const int sensorPin = A0;
 int sensorValue = 0;
+const int START = 10;
+const int onpin = 8;
 
-void setup() {
-  Serial.begin(115200); 
+void setup(){
+  pinMode(onpin, OUTPUT);
+  digitalWrite(onpin, LOW);
 }
 
-void loop() {
-  //sensorValue = 9462 / (analogRead(sensorPin) - 16.92);
+void loop(){
   int anal = analogRead(sensorPin);
-  sensorValue = 4800 / (anal - 20);
-  Serial.println(sensorValue);
-  Serial.println(anal);
-  Serial.println("=====");
-  delay(2000);       
+  if(anal >= 0){
+    sensorValue = 4800 / (anal - 20);
+    
+    if((START >= sensorValue) && (0 <= sensorValue)){
+      //Serial.println(sensorValue);
+      digitalWrite(onpin, HIGH);
+    }else{
+      digitalWrite(onpin, LOW);
+    }
+  }
+  delay(50);       
 }

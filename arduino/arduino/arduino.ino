@@ -36,7 +36,7 @@ boolean started = false;
 const int MIXER_DISTANCE = 100;
 const int PIN_TRAY[4] = {9, 10, 11, 12};
 //const int PIN_MIXER[4] = {15, 14, 17, 16};
-const int PIN_LIQUID[7] = {41, 43, 45, 47, 49, 51, 50};
+const int PIN_LIQUID[7] = {41, 43, 45, 47, 49, 51, 46};
 const int PIN_START_BTN = 7;
 
 // Trayd
@@ -307,14 +307,14 @@ void start(){
  * false if unsuccessful.
  */
 boolean dispenseLiquid(int liquid, int servings){
-  int i = 0;
+  /*int i = 0;
   for(i = 0; i < 7; i++){
     Serial.println(PIN_LIQUID[i]);
     digitalWrite(PIN_LIQUID[i], HIGH);
     delay(5000);
     digitalWrite(PIN_LIQUID[i], LOW);
     delay(5000);
-  }
+  }*/
 
   int time = 0;
   int servingSize = 44;
@@ -325,7 +325,7 @@ boolean dispenseLiquid(int liquid, int servings){
     // Only serve max of 250ml
     // One serving = 44ml
     // Dispensors speed is 12.5 servings/second
-    time = ((amount * servingSize) / servingSize);
+    time = ((amount * servingSize) / servingSpeed);
 
     digitalWrite(PIN_LIQUID[liquid], HIGH);
     delay(time * 1000);

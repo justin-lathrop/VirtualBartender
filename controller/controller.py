@@ -14,7 +14,7 @@
 "       - '0' => Error
 "       - '1' => Success
 "       - '2' => Unknown command
-"       - '!' => Emergency (stop)
+"       - '!' => Confirm/Emergency
 "   Commands:
 "       - 'L' => Dispense Liquid
 "           <liquid number> <servings>
