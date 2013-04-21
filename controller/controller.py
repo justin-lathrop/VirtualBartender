@@ -257,9 +257,9 @@ def main():
                     # Get confirmation to start next drink
                     ser.write('B')
                     while ser.read() != '!':
-                        time.sleep(0.5
+                        time.sleep(0.5)
                 else:
-                    print '\n\nFailed to make order\n\n'
+		    print '\n\nFailed to make order\n\n'
         """if numDrinks >= 6:
             print "Six drinks have been made"
             print "Command Arduino to:"
@@ -272,7 +272,7 @@ def main():
                 numDrinks = 0
                 print "\nDrink count zeroed out\n"
             else:
-                print "\n\nError getting user button press\n\n""""
+                print "\n\nError getting user button press\n\n"""
         time.sleep(2)
     print '\n\nController exited\n\n'
 
