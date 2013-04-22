@@ -34,7 +34,7 @@ int traySpots = 0;
 volatile boolean emergState = false;
 boolean started = false;
 const int MIXER_DISTANCE = 100;
-const int PIN_TRAY[4] = {9, 10, 11, 12};
+const int PIN_TRAY[4] = {15, 16, 17, 18};
 //const int PIN_MIXER[4] = {15, 14, 17, 16};
 const int PIN_LIQUID[7] = {41, 43, 45, 47, 49, 51, 46};
 const int PIN_START_BTN = 7;
@@ -125,7 +125,7 @@ boolean moveDown_mixer(int d){
 // Main Program
 void setup(){
   // Set up motor speeds
-  myStepper_tray.setSpeed(10);
+  myStepper_tray.setSpeed(15);
   //myStepper_mixer.setSpeed(30);
 
   // Set up buttons
@@ -283,7 +283,8 @@ void start(){
   while(1){
     if(digitalRead(PIN_START_BTN) == LOW){
       emergState = false;
-      if(!started){ Serial.write('!'); }
+      //if(!started){ Serial.write('!'); }
+      Serial.write('!');
       started = true;
       break;
     }
@@ -308,6 +309,16 @@ void start(){
  */
 boolean dispenseLiquid(int liquid, int servings){
   /*int i = 0;
+  for(i = 30; i <= 55; i++){
+    digitalWrite(i, HIGH);
+    Serial.println("\n\n");
+    Serial.println(i);
+    delay(1000);
+    digitalWrite(i, LOW);
+    delay(5000);
+  }*/
+  
+  /*int i = 0;
   for(i = 0; i < 7; i++){
     Serial.println(PIN_LIQUID[i]);
     digitalWrite(PIN_LIQUID[i], HIGH);
@@ -316,19 +327,19 @@ boolean dispenseLiquid(int liquid, int servings){
     delay(5000);
   }*/
 
-  int time = 0;
-  int servingSize = 44;
+  double time = 0.0;
+  double servingSize = 44.36;
   double servingSpeed = 12.5;
 
   if((liquid >= 0) && (amount >= 1)){
     // Calculate time given serving amount
     // Only serve max of 250ml
-    // One serving = 44ml
+    // One serving = 44.36ml
     // Dispensors speed is 12.5 servings/second
     time = ((amount * servingSize) / servingSpeed);
 
     digitalWrite(PIN_LIQUID[liquid], HIGH);
-    delay(time * 1000);
+    delay(time * 1000.0);
     digitalWrite(PIN_LIQUID[liquid], LOW);
   }else{
     return false;
