@@ -14,6 +14,9 @@
  *  'D': move down mixer
  *  'U'; move up mixer
  *  'B': wait for start button
+ *  'P': parallel dispensing
+ *    params: <14 bytes drink 
+ *              and servings>
  *
  * @return: returns '1' for
  * success and '0' for failure
@@ -31,11 +34,12 @@ char input = 0;
 int drink = 0;
 int amount = 0;
 int traySpots = 0;
+int i = 0;
+char drinks[7] = {'a', 'a', 'a', 'a', 'a', 'a', 'a'};
 volatile boolean emergState = false;
 boolean started = false;
 const int MIXER_DISTANCE = 100;
 const int PIN_TRAY[4] = {15, 16, 17, 18};
-//const int PIN_MIXER[4] = {15, 14, 17, 16};
 const int PIN_LIQUID[7] = {41, 43, 45, 47, 49, 51, 46};
 const int PIN_START_BTN = 7;
 
@@ -97,36 +101,11 @@ boolean turnOffMixer(){
   digitalWrite(mixerOnPin, LOW);
   digitalWrite(mixerOffPin, HIGH);
 }
-
-/*const double stepDegree_mixer = 7.5;
-const int stepsPerRevolution_mixer = (int) 360 / stepDegree_mixer;
-Stepper myStepper_mixer(stepsPerRevolution_mixer, PIN_MIXER[0], PIN_MIXER[1], PIN_MIXER[2], PIN_MIXER[3]);
- 
-void steps_mixer(int d, int n){
-  myStepper_mixer.step(n);
-  delay(d);
-}
- 
-void degreeStep_mixer(double deg, int d){
-  int nStep = (int) deg / stepDegree_mixer;
-  steps_mixer(d, nStep);
-}
- 
-boolean moveUp_mixer(int d){
-  degreeStep_mixer(-300, d);
-  return true;
-}
- 
-boolean moveDown_mixer(int d){
-  degreeStep_mixer(300, d);
-  return true;
-}*/
  
 // Main Program
 void setup(){
   // Set up motor speeds
   myStepper_tray.setSpeed(15);
-  //myStepper_mixer.setSpeed(30);
 
   // Set up buttons
   pinMode(PIN_START_BTN, INPUT);
@@ -173,6 +152,7 @@ void loop(){
     start();
   }
 
+  i = 0;
   drink = 0;
   amount = 0;
   traySpots = 0;
@@ -182,6 +162,17 @@ void loop(){
       input = Serial.read();
      
       switch(input){
+        case 'P':
+          for(i = 0; i < 7; i++){
+            drinks[i] = getChar();
+          }
+          amount = getInt();
+          if(parallel(drinks, amount)){
+            success();
+          }else{
+            error();
+          }
+          break;
         case 'L':
           drink = getInt();
           amount = getInt();
@@ -239,8 +230,42 @@ void loop(){
 }
 
 /*
+ * Given an array of drinks in 
+ * order from 0 to 7 dispense 
+ * amount for each in "||".
+ * 
+ * @param:
+ *   - char * (array of drinks)
+ *     - all are '1' or '0'
+ *   - int amount for all drinks 
+ *     to be served at once
+ * 
+ * @return:
+ *   - boolean if successful
+ */
+boolean parallel(char *drinks, int amount){
+  int i = 0;
+  double time = getTime(amount);
+  
+  for(i = 0; i < 7; i++){
+    if(drinks[i] == '1'){
+      digitalWrite(PIN_LIQUID[i], HIGH);
+    }else{
+      digitalWrite(PIN_LIQUID[i], LOW);
+    }
+  }
+
+  delay(time);
+
+  for(i = 0; i < 7; i++){
+    digitalWrite(PIN_LIQUID[i], LOW);
+  }
+  return true;
+}
+
+/*
  * Wait for serial input 
- * then parse byte into a 
+ * then parse byte into an 
  * integer.
  * 
  * @return: Serial input integer
@@ -255,6 +280,22 @@ int getInt(){
     delay(10);
   }
   return(in);
+}
+
+/*
+ * Wait for serial input 
+ * then parse byte into a 
+ * char.
+ * 
+ * @return: Serial input char
+ */
+char getChar(){
+  while(1){
+    if(Serial.available() > 0){
+      return Serial.read();
+    }
+    delay(10);
+  }
 }
 
 /*
@@ -308,44 +349,33 @@ void start(){
  * false if unsuccessful.
  */
 boolean dispenseLiquid(int liquid, int servings){
-  /*int i = 0;
-  for(i = 30; i <= 55; i++){
-    digitalWrite(i, HIGH);
-    Serial.println("\n\n");
-    Serial.println(i);
-    delay(1000);
-    digitalWrite(i, LOW);
-    delay(5000);
-  }*/
-  
-  /*int i = 0;
-  for(i = 0; i < 7; i++){
-    Serial.println(PIN_LIQUID[i]);
-    digitalWrite(PIN_LIQUID[i], HIGH);
-    delay(5000);
-    digitalWrite(PIN_LIQUID[i], LOW);
-    delay(5000);
-  }*/
-
-  double time = 0.0;
-  double servingSize = 44.36;
-  double servingSpeed = 12.5;
-
   if((liquid >= 0) && (amount >= 1)){
-    // Calculate time given serving amount
-    // Only serve max of 250ml
-    // One serving = 44.36ml
-    // Dispensors speed is 12.5 servings/second
-    time = ((amount * servingSize) / servingSpeed);
-
     digitalWrite(PIN_LIQUID[liquid], HIGH);
-    delay(time * 1000.0);
+    delay(getTime(amount) * 1000.0);
     digitalWrite(PIN_LIQUID[liquid], LOW);
   }else{
     return false;
   }
 
   return true;
+}
+
+/*
+ * Calculate the amount of time to 
+ * delay for a specific serving 
+ * size.
+ * 
+ * @param:
+ *   - int servings/amount
+ * 
+ * @return:
+ *   - double time to delay (seconds)
+ */
+double getTime(int amount){
+  double servingSize = 44.36;
+  double servingSpeed = 12.5;
+
+  return ((amount * servingSize) / servingSpeed);
 }
 
 /*

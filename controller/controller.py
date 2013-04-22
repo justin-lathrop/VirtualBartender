@@ -23,6 +23,8 @@
 "       - 'D' => Move down mixer
 "       - 'U' => Move up mixer
 "       - 'B' => Wait for start button
+"       - 'P' => Parallel dispensing
+"           <7 bytes -> array of servings>
 " When order is completed the drink
 " item will be erased from 'Orders'
 " directory and put into the 'Finished'
