@@ -1,0 +1,1 @@
+{"image": "image?name=Bartender.png", "drinkList": [{"amount": "4", "name": "E"}, {"amount": "2", "name": "B"}], "alcoholPerc": "30%", "title": "Jager Bomb"}

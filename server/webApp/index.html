@@ -11,7 +11,7 @@
   <script>
     // Globals
     var url = "https://" + window.location.hostname + ":" + window.location.port + "/";
-    var listQueueInt;
+    var listQueueInt, listQueueIntFin;
 
     $(document).ready(function(){
         // Obtain and fill in all the recipes
@@ -26,7 +26,8 @@
         });// ajax
         ///////////////////////////////////
  
-	listQueueInt = window.setInterval(drinkQueue, 10000);
+	listQueueInt = window.setInterval(drinkQueue, 5000);
+	listQueueIntFin = window.setInterval(drinkQueueFinished, 5000);
    });// ready
 
     $(document).bind('pageinit', function(){
@@ -84,7 +85,7 @@
 		}// for
 		//alert(queue);
 
-		$('#drinkQueueList').empty();
+		$('#drinkQueueList').empty().append('<li data-role="list-divider">Drinks in the Queue</li>');
 		for(var i = 0; i < queue.length - 1; i++){
 		    $('#drinkQueueList').append('<li>'+ queue[i].split('_')[0] + '</li>');
 		}// for
@@ -94,6 +95,31 @@
 		//alert('error ' + textStatus + " " + errorThrown);
 		alert('There was an error please report this code: 213');
 		window.clearInterval(listQueueInt);
+	    }
+	});// ajax
+    }// drinkQueue
+
+    function drinkQueueFinished(){
+	$.ajax({
+	    url: url + 'finishedQueue',
+	    success: function(data){
+		//alert(data);
+		var queue = data.split('\n');
+		for(var i = 0; i < queue.length - 1; i++){
+		    queue[i] = queue[i].split('.')[0];
+		}// for
+		//console.log(queue);
+
+		$('#drinkQueueFinished').empty().append('<li data-role="list-divider">Drinks Finished</li>');
+		for(var i = 0; i < queue.length - 1; i++){
+		    $('#drinkQueueFinished').append('<li>'+ queue[i].split('_')[0] + '</li>');
+		}// for
+		$('#drinkQueueFinished').listview('refresh');
+	    },
+	    error: function(jqXHR, textStatus, errorThrown){
+		//alert('error ' + textStatus + " " + errorThrown);
+		alert('There was an error please report this code: 214');
+		window.clearInterval(listQueueIntFin);
 	    }
 	});// ajax
     }// drinkQueue

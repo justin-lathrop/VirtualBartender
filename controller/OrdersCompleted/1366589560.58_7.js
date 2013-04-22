@@ -1,0 +1,1 @@
+{"image": "image?name=Bartender.png", "drinkList": [{"amount": "1", "name": "A"}, {"amount": "1", "name": "B"}], "alcoholPerc": "0%", "title": "Mud Slide"}

@@ -39,6 +39,8 @@ import serial
 import time
 import os
 import json
+import traceback
+import sys
 
 orderDir = './Orders'
 completedDir = './OrdersCompleted'
@@ -135,6 +137,9 @@ def fillOrder(order, ser):
         print
         print
 
+    # Wait for liquid to clear tubes
+    time.sleep(5)
+
     # Turn tray to next position
     print "Command Arduino to:"
     print "> Move tray 1 position"
@@ -179,6 +184,7 @@ def fillAdminReq(ser):
         print 'Processing command ' + el
         if el == 'Turn_Tray.command':
             ser.write('T')
+            ser.write('1')
             response = ser.read()
             print 'Arduino responded with ' + response
         elif el == 'Mix_Drink.command':
@@ -222,59 +228,71 @@ def readSerial(ser):
             return serIn
 
 def main():
-    print 'Initializing Controller'
-    numDrinks = 0
-    ser = serial.Serial(serialDevice, baudRate)
-    time.sleep(5)
-    ser.flush()
-    ser.flushInput()
-    ser.flushOutput()
-
-    # Wait until start button is pressed
-    while ser.read() != '!':
-        time.sleep(0.5)
-    
-    ser.flush()
-    ser.flushInput()
-    ser.flushOutput()
-
-    print 'Initialization Complete'
-    print
-
-    # Loop forever filling orders
-    while 1:
-        if admin():
-            fillAdminReq(ser)
-        else:
-            currentOrder = getNextOrder()
-            if currentOrder != False:
-                if fillOrder(currentOrder, ser):
-                    markOrderComplete()
-                    
-                    #numDrinks = numDrinks + 1
-                    print '\n\nOrder complete\n\n'
-
-                    # Get confirmation to start next drink
-                    ser.write('B')
-                    while ser.read() != '!':
-                        time.sleep(0.5)
-                else:
-		    print '\n\nFailed to make order\n\n'
-        """if numDrinks >= 6:
-            print "Six drinks have been made"
-            print "Command Arduino to:"
-            print "> Get start button press"
-            ser.write('B')
-            serIn = ser.read()
-            if serIn == '1':
-                print "Arduino Response:"
-                print "> " + serIn
-                numDrinks = 0
-                print "\nDrink count zeroed out\n"
-            else:
-                print "\n\nError getting user button press\n\n"""
+    try:
+        print 'Initializing Controller'
+        numDrinks = 0
+        ser = serial.Serial(serialDevice, baudRate)
         time.sleep(2)
-    print '\n\nController exited\n\n'
+        ser.flush()
+        ser.flushInput()
+        ser.flushOutput()
+
+        # Wait until start button is pressed
+        while ser.read() != '!':
+            time.sleep(0.5)
+    
+        ser.flush()
+        ser.flushInput()
+        ser.flushOutput()
+
+        print 'Initialization Complete'
+        print
+
+        # Loop forever filling orders
+        while 1:
+            if admin():
+                fillAdminReq(ser)
+            else:
+                currentOrder = getNextOrder()
+                if currentOrder != False:
+                    if fillOrder(currentOrder, ser):
+                        markOrderComplete()
+                    
+                        #numDrinks = numDrinks + 1
+                        print '\n\nOrder complete\n\n'
+
+                        # Get confirmation to start next drink
+                        ser.write('B')
+                        while ser.read() != '!':
+                            time.sleep(0.5)
+                    else:
+                        print '\n\nFailed to make order\n\n'
+            """if numDrinks >= 6:
+                print "Six drinks have been made"
+                print "Command Arduino to:"
+                print "> Get start button press"
+                ser.write('B')
+                serIn = ser.read()
+                if serIn == '1':
+                    print "Arduino Response:"
+                    print "> " + serIn
+                    numDrinks = 0
+                    print "\nDrink count zeroed out\n"
+                else:
+                    print "\n\nError getting user button press\n\n"""
+            time.sleep(2)
+        print '\n\nController exited\n\n'
+    except KeyboardInterrupt:
+        print
+        print 'Closing Serial Port'
+        ser.close()
+        print
+        print 'Exiting...'
+    except Exception:
+        traceback.print_exc(file=sys.stdout)
+    sys.exit(0)
+
+
 
 if __name__ == '__main__':
     main()

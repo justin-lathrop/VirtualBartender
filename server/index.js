@@ -10,6 +10,7 @@ handle["/image"] = requestHandlers.image;
 handle["/recipes"] = requestHandlers.recipes;
 handle["/getIngredients"] = requestHandlers.getIngredients;
 handle["/drinkQueue"] = requestHandlers.drinkQueue;
+handle["/finishedQueue"] = requestHandlers.finishedQueue;
 handle["/js"] = requestHandlers.js;
 handle["/css"] = requestHandlers.css;
 handle["/admin"] = requestHandlers.admin;

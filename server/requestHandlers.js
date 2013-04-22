@@ -89,6 +89,15 @@ function drinkQueue(response, postData, getData){
     });// process
 }// drinkQueue
 
+function finishedQueue(response, postData, getData){
+    console.log("Request handler 'finishedQueue' was called.");
+
+    process('ls ../controller/OrdersCompleted', function(error, stdout){
+	response.writeHead(200, {'Content-Type': 'text/plain'});
+	response.end(stdout);
+    });// process
+}// finishedQueue
+
 function admin(response, postData, getData){
     console.log("Request handler 'admin' was called.");
 
@@ -123,3 +132,4 @@ exports.drinkQueue = drinkQueue;
 exports.js = js;
 exports.css = css;
 exports.admin = admin;
+exports.finishedQueue = finishedQueue;
