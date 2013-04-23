@@ -25,6 +25,7 @@
 "       - 'B' => Wait for start button
 "       - 'P' => Parallel dispensing
 "           <7 bytes -> array of servings>
+"           <1 byte -> amount>
 " When order is completed the drink
 " item will be erased from 'Orders'
 " directory and put into the 'Finished'
@@ -43,6 +44,7 @@ import os
 import json
 import traceback
 import sys
+from fractions import gcd
 
 orderDir = './Orders'
 completedDir = './OrdersCompleted'

@@ -17,6 +17,7 @@
  *  'P': parallel dispensing
  *    params: <14 bytes drink 
  *              and servings>
+ *  'R': reset tray
  *
  * @return: returns '1' for
  * success and '0' for failure
@@ -42,6 +43,8 @@ const int MIXER_DISTANCE = 100;
 const int PIN_TRAY[4] = {15, 16, 17, 18};
 const int PIN_LIQUID[7] = {41, 43, 45, 47, 49, 51, 46};
 const int PIN_START_BTN = 7;
+const int PHOTO_SENSOR_PIN = A1;
+const int PHOTO_SENSOR_LIMIT = 700;
 
 // Trayd
 // 1.8(degree) per step
@@ -162,11 +165,21 @@ void loop(){
       input = Serial.read();
      
       switch(input){
+        case 'R':
+          if(resetTray()){
+            success();
+          }else{
+            error();
+          }
+          break;
         case 'P':
           for(i = 0; i < 7; i++){
             drinks[i] = getChar();
+            //Serial.println(drinks[i]);
           }
           amount = getInt();
+          //Serial.println("amount:");
+          //Serial.println(amount);
           if(parallel(drinks, amount)){
             success();
           }else{
@@ -230,6 +243,29 @@ void loop(){
 }
 
 /*
+ * Spins tray until photosensor 
+ * detects trigger on the tray.
+ * 
+ * @return: true if successful and 
+ *   false if unseccessful
+ */
+boolean resetTray(){
+  int count = 0;
+  while(1){
+    count++;
+    if(count >= 240) break;
+
+    if(analogRead(A1) > PHOTO_SENSOR_LIMIT){
+      return true;
+    }else{
+      degreeStep_tray(3, 0);
+    }
+  }
+
+  return false;
+}
+
+/*
  * Given an array of drinks in 
  * order from 0 to 7 dispense 
  * amount for each in "||".
@@ -248,6 +284,13 @@ boolean parallel(char *drinks, int amount){
   double time = getTime(amount);
   
   for(i = 0; i < 7; i++){
+    if((drinks[i] != '1') && (drinks[i] != '0')){
+      for(i = 0; i < 7; i++){
+        digitalWrite(PIN_LIQUID[i], LOW);
+      }
+      return false;
+    }
+
     if(drinks[i] == '1'){
       digitalWrite(PIN_LIQUID[i], HIGH);
     }else{
@@ -255,7 +298,7 @@ boolean parallel(char *drinks, int amount){
     }
   }
 
-  delay(time);
+  delay(time * 1000);
 
   for(i = 0; i < 7; i++){
     digitalWrite(PIN_LIQUID[i], LOW);
