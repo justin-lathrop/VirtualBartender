@@ -11,8 +11,6 @@
  *   params: drink num, amount
  *  'T': move tray
  *    params: drink spots to move
- *  'D': move down mixer
- *  'U'; move up mixer
  *  'B': wait for start button
  *  'P': parallel dispensing
  *    params: <14 bytes drink 
@@ -26,7 +24,7 @@
  * perform from Serial Port. 
  * If there is an '!' that either 
  * means the emergency stop has 
- * begun or it has just happened.
+ * begun or it has just started.
  */
 #include <Stepper.h>
 
@@ -43,6 +41,7 @@ const int MIXER_DISTANCE = 100;
 const int PIN_TRAY[4] = {15, 16, 17, 18};
 const int PIN_LIQUID[7] = {41, 43, 45, 47, 49, 51, 46};
 const int PIN_START_BTN = 7;
+const int PIN_EMERG_BTN = 2;
 const int PHOTO_SENSOR_PIN = A1;
 const int PHOTO_SENSOR_LIMIT = 700;
 
@@ -54,8 +53,13 @@ const int stepsPerRevolution_tray = (int) 360 / stepDegree_tray;
 Stepper myStepper_tray(stepsPerRevolution_tray, PIN_TRAY[0], PIN_TRAY[1], PIN_TRAY[2], PIN_TRAY[3]);
 
 void steps_tray(int d, int n){
-  myStepper_tray.step(n);
-  delay(d);
+  int i = 0;
+
+  while(1){
+    if((i >= n) || (emergState)){ break; }
+    myStepper_tray.step(3);
+    i += 3;
+  }
 }
 
 void degreeStep_tray(double deg, int d){
@@ -68,43 +72,6 @@ void moveTray(int n, int d){
   degreeStep_tray(cup, d);
 }
  
-// Mixer
-const int mixerTop = 26; // cm
-const int mixerBottom = 14; // cm
-int mixerDistancePin = A0;
-int mixerOnPin = 0;
-int mixerOffPin = 0;
-
-boolean moveMixerUp(){
-  int sensorValue = 0;
-
-  while(sensorValue <= mixerTop){
-    sensorValue = (4800 / (analogRead(mixerDistancePin) - 20));
-  }
-  
-  return true;
-}
-
-boolean moveMixerDown(){
-  int sensorValue = 50;
-
-  while(sensorValue >= mixerBottom){
-    sensorValue = (4800 / (analogRead(mixerDistancePin) - 20));
-  }
-
-  return true;
-}
-
-boolean turnOnMixer(){
-  digitalWrite(mixerOnPin, HIGH);
-  digitalWrite(mixerOffPin, LOW);
-}
-
-boolean turnOffMixer(){
-  digitalWrite(mixerOnPin, LOW);
-  digitalWrite(mixerOffPin, HIGH);
-}
- 
 // Main Program
 void setup(){
   // Set up motor speeds
@@ -113,9 +80,10 @@ void setup(){
   // Set up buttons
   pinMode(PIN_START_BTN, INPUT);
   digitalWrite(PIN_START_BTN, HIGH);
+  pinMode(PIN_EMERG_BTN, INPUT);
+  digitalWrite(PIN_EMERG_BTN, HIGH);
 
   // Set up dispensor pins
-  pinMode(14, OUTPUT);
   pinMode(PIN_LIQUID[0], OUTPUT);
   pinMode(PIN_LIQUID[1], OUTPUT);
   pinMode(PIN_LIQUID[2], OUTPUT);
@@ -131,26 +99,20 @@ void setup(){
   digitalWrite(PIN_LIQUID[5], LOW);
   digitalWrite(PIN_LIQUID[6], LOW);
 
-  // Set up mixer pins, initialized to off
-  pinMode(mixerOnPin, OUTPUT);
-  pinMode(mixerOffPin, OUTPUT);
-  digitalWrite(mixerOnPin, LOW);
-  digitalWrite(mixerOffPin, HIGH);
-
   // Begin listening on serial
   Serial.begin(115200);
   
   // Initialize hardware interrupts
   pinMode(2, INPUT);
   digitalWrite(2, HIGH);
-  //attachInterrupt(0, emergency, LOW);
+  attachInterrupt(0, emergency, LOW);
 
   // Wait for "start" button to be pressed
   start();
 }
  
 void loop(){
-  if(digitalRead(2) == LOW){
+  if((digitalRead(PIN_EMERG_BTN) == LOW) || (emergState)){
     Serial.write('!');
     start();
   }
@@ -174,12 +136,14 @@ void loop(){
           break;
         case 'P':
           for(i = 0; i < 7; i++){
-            drinks[i] = getChar();
-            //Serial.println(drinks[i]);
+            if(emergState){
+              break;
+            }else{
+              drinks[i] = getChar();
+            }
           }
+          if(emergState){ break; }
           amount = getInt();
-          //Serial.println("amount:");
-          //Serial.println(amount);
           if(parallel(drinks, amount)){
             success();
           }else{
@@ -187,8 +151,11 @@ void loop(){
           }
           break;
         case 'L':
+          if(emergState){ break; }
           drink = getInt();
+          if(emergState){ break; }
           amount = getInt();
+          if(emergState){ break; }
           if((drink < 7) && (amount != 0)){
             if(dispenseLiquid(drink, amount)){
               success();
@@ -200,10 +167,13 @@ void loop(){
           }
           break;
         case 'T':
+          if(emergState){ break; }
           traySpots = getInt();
-          //Serial.write(traySpots);
+          if(emergState){ break; }
           if(traySpots > 0){
+            if(emergState){ break; }
             if(rotateTray(traySpots)){
+              if(emergState){ break; }
               success(); 
             }else{
               error();
@@ -212,21 +182,8 @@ void loop(){
             error();
           }
           break;
-        case 'D':
-          if(true/*moveDown_mixer(MIXER_DISTANCE)*/){
-            success();
-          }else{
-            error();
-          }
-          break;
-        case 'U':
-          if(true/*moveUp_mixer(MIXER_DISTANCE)*/){
-            success();
-          }else{
-            error();
-          }
-          break;
         case 'B':
+          if(emergState){ break; }
           start();
           success();
           break;
@@ -234,12 +191,39 @@ void loop(){
           unknown();
           break;
       };
-      //Serial.println(input);
-    }else{
-      //Serial.write('!');
-      start();
-    }
+    }// if
   }// if
+}// loop
+
+/*
+ * Using millis function to get 
+ * current time in milliseconds 
+ * since startup in order to 
+ * busy wait for either emerg 
+ * button press or time to run 
+ * out.
+ * 
+ * @return: true is no emerg 
+ *   button press, false is not
+ */
+boolean Delay(int time){
+  unsigned long startMilli = millis();
+  int diff = 0;
+  unsigned long currentMilli = 0.0;
+  while(1){
+    if(emergState){
+      return false;
+    }else{
+      if(diff >= time){
+        break;
+      }else{
+        currentMilli = millis();
+        diff = (currentMilli - startMilli);
+      }
+    }
+  }
+
+  return true;
 }
 
 /*
@@ -247,18 +231,19 @@ void loop(){
  * detects trigger on the tray.
  * 
  * @return: true if successful and 
- *   false if unseccessful
+ *   false if unseccessful/emerg
  */
 boolean resetTray(){
   int count = 0;
   while(1){
+    if(emergState) return false;
     count++;
     if(count >= 240) break;
 
     if(analogRead(A1) > PHOTO_SENSOR_LIMIT){
       return true;
     }else{
-      degreeStep_tray(3, 0);
+      degreeStep_tray(2, 0);
     }
   }
 
@@ -280,6 +265,7 @@ boolean resetTray(){
  *   - boolean if successful
  */
 boolean parallel(char *drinks, int amount){
+  if(emergState) return false;
   int i = 0;
   double time = getTime(amount);
   
@@ -298,7 +284,7 @@ boolean parallel(char *drinks, int amount){
     }
   }
 
-  delay(time * 1000);
+  Delay(time * 1000);
 
   for(i = 0; i < 7; i++){
     digitalWrite(PIN_LIQUID[i], LOW);
@@ -311,16 +297,19 @@ boolean parallel(char *drinks, int amount){
  * then parse byte into an 
  * integer.
  * 
- * @return: Serial input integer
+ * @return: Serial input integer, 
+ *   or -1 is emergState
  */
 int getInt(){
   int in = 0;
   while(1){
-    if(Serial.available() > 0){
+    if(emergState){
+      return(-1);
+    }else if(Serial.available() > 0){
       in = (Serial.read() - '0');
       break;
     }
-    delay(10);
+    Delay(10);
   }
   return(in);
 }
@@ -330,14 +319,17 @@ int getInt(){
  * then parse byte into a 
  * char.
  * 
- * @return: Serial input char
+ * @return: Serial input char 
+ *   or '-' is emergency.
  */
 char getChar(){
   while(1){
-    if(Serial.available() > 0){
+    if(emergState){
+      return '-';
+    }else if(Serial.available() > 0){
       return Serial.read();
     }
-    delay(10);
+    Delay(10);
   }
 }
 
@@ -366,13 +358,25 @@ void emergency(){
 void start(){
   while(1){
     if(digitalRead(PIN_START_BTN) == LOW){
+      flushSerialInput();
       emergState = false;
       //if(!started){ Serial.write('!'); }
       Serial.write('!');
       started = true;
       break;
     }
-    delay(10);
+    Delay(10);
+  }
+}
+
+/*
+ * Clears all input data on 
+ * the serial bus.  Does 
+ * not care about emergState.
+ */
+void flushSerialInput(){
+  while(Serial.available() > 0){
+    Serial.read();
   }
 }
 
@@ -392,9 +396,11 @@ void start(){
  * false if unsuccessful.
  */
 boolean dispenseLiquid(int liquid, int servings){
+  if(emergState) return false;
+
   if((liquid >= 0) && (amount >= 1)){
     digitalWrite(PIN_LIQUID[liquid], HIGH);
-    delay(getTime(amount) * 1000.0);
+    Delay(getTime(amount) * 1000.0);
     digitalWrite(PIN_LIQUID[liquid], LOW);
   }else{
     return false;
@@ -405,16 +411,18 @@ boolean dispenseLiquid(int liquid, int servings){
 
 /*
  * Calculate the amount of time to 
- * delay for a specific serving 
+ * Delay for a specific serving 
  * size.
  * 
  * @param:
  *   - int servings/amount
  * 
  * @return:
- *   - double time to delay (seconds)
+ *   - double time to Delay (seconds)
  */
 double getTime(int amount){
+  if(emergState) return false;
+
   double servingSize = 44.36;
   double servingSpeed = 12.5;
 
@@ -432,6 +440,8 @@ double getTime(int amount){
  * false if unsuccessful.
  */
 boolean rotateTray(int spots){
+  if(emergState) return false;
+
    moveTray(spots, 0);
    return true;
 }
@@ -441,22 +451,25 @@ boolean rotateTray(int spots){
  * onto Serial Port.
  */
 void error(){
-   Serial.print('0');
+  if(emergState){ return; }
+  Serial.print('0');
 }
  
- /*
+/*
  * Print success character
  * onto Serial Port.
  */
 void success(){
+  if(emergState){ return; }
    Serial.print('1');
 }
  
- /*
-  * Print unknown character
-  * onto Serial Port.
-  */
-  void unknown(){
-    Serial.print('2');
-  }
+/*
+ * Print unknown character
+ * onto Serial Port.
+ */
+void unknown(){
+  if(emergState){ return; }
+  Serial.print('2');
+}
 

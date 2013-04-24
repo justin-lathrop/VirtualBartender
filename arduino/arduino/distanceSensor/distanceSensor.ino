@@ -14,7 +14,6 @@ void loop(){
     sensorValue = 4800 / (anal - 20);
     
     if((START >= sensorValue) && (0 <= sensorValue)){
-      //Serial.println(sensorValue);
       digitalWrite(onpin, HIGH);
     }else{
       digitalWrite(onpin, LOW);
