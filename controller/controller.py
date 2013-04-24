@@ -26,6 +26,7 @@
 "       - 'P' => Parallel dispensing
 "           <7 bytes -> array of servings>
 "           <1 byte -> amount>
+"       - 'R' => Reset tray
 " When order is completed the drink
 " item will be erased from 'Orders'
 " directory and put into the 'Finished'
@@ -54,6 +55,7 @@ baudRate = '115200'
 drinks = {"A": '0', "B": '1', "C": '2',
           "D": '3', "E": '4', "F": '5',
           "G": '6'}
+emergState = False
 
 
 def markOrderComplete():
@@ -134,7 +136,17 @@ def fillOrder(order, ser):
         print "> Dispense Liquid " + d['name']
         print "> Amount " + d['amount']
 
-        serIn = ser.read()
+        serIn = readSerial()
+        print "Arduino Reponse:"
+        print "> " + serIn
+        if emergState == True:
+            print
+            print "!!!! EMERGENCY BEGIN !!!!"
+            print "Skipping current drink..."
+            print "Will wait until Go button pressed..."
+            print "!!!! EMERGENCY FINISH !!!!"
+            print
+            return False
 
         print "Arduino Response:"
         print "> " + serIn
@@ -227,7 +239,8 @@ def readSerial(ser):
         serIn = ser.read()
 
         if serIn == '!':
-           time.sleep(2)
+           emergState = True
+           return serIn
         else:
             return serIn
 

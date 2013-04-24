@@ -50,15 +50,16 @@ const int PHOTO_SENSOR_LIMIT = 700;
 //   360 / 1.8 = 200 steps
 const double stepDegree_tray = 1.8;
 const int stepsPerRevolution_tray = (int) 360 / stepDegree_tray;
-Stepper myStepper_tray(stepsPerRevolution_tray, PIN_TRAY[0], PIN_TRAY[1], PIN_TRAY[2], PIN_TRAY[3]);
+Stepper myStepper_tray(stepsPerRevolution_trayT1
+, PIN_TRAY[0], PIN_TRAY[1], PIN_TRAY[2], PIN_TRAY[3]);
 
 void steps_tray(int d, int n){
   int i = 0;
 
   while(1){
     if((i >= n) || (emergState)){ break; }
-    myStepper_tray.step(3);
-    i += 3;
+    myStepper_tray.step(1);
+    i += 1;
   }
 }
 
@@ -243,7 +244,9 @@ boolean resetTray(){
     if(analogRead(A1) > PHOTO_SENSOR_LIMIT){
       return true;
     }else{
-      degreeStep_tray(2, 0);
+      //degreeStep_tray(1, 0);
+      //steps_tray(3, 0);
+      myStepper_tray.step(1);
     }
   }
 
