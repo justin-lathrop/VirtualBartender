@@ -46,6 +46,7 @@ import json
 import traceback
 import sys
 from fractions import gcd
+import operator
 
 orderDir = './Orders'
 completedDir = './OrdersCompleted'
@@ -105,6 +106,21 @@ def getNextOrder():
         return False
 
 
+def listDone(List, val):
+    """
+    " Will check if all elements in
+    " the list are the same.
+    "
+    " @param: list, val
+    "
+    " @return: boolean
+    """
+    for x in list:
+        if x[1] != 0:
+            return False
+    return True
+
+
 def fillOrder(order, ser):
     """
     " Fills the order of a drink and 
@@ -122,7 +138,61 @@ def fillOrder(order, ser):
     """
     print 'Filling order <' + order['title'] + '>'
 
-    # Loop through all drinks in list
+    # Create list of drinks
+    drinks = {}
+    for d in order['drinkList']:
+        drinks[ d['name'] ] = int( d['amount'] )
+    # Create a sorted list holding tuples for drink
+    # names and amounts in type int
+    drinks = sorted(drinks.iteritems(), key=operator.itemgetter(1))
+
+    while len(drinks) > 0:
+        if listDone(drinks):
+            break
+        else:
+            # Clean up the drinks list
+            for index, d in enumerate(drinks):
+                if d[1] == 0:
+                    del drinks[index]
+
+            # Send parallel order request for next liquid amount
+            # to be served
+            print "Command Arduino to:"
+            print "> Dispense Parallel liquids"
+            msg = ''
+            ser.write('P')
+            for d in order['drinklist']:
+                if not [(x,y) for x, y in drinks if x == d['name']]:
+                    msg = msg + '0'
+                    ser.write('0')
+                else:
+                    msg = msg + '1'
+                    ser.write('1')
+            # Finally put the amount for all to be served on the end
+            ser.write( str(drinks[0][1]) )
+            msg = drinks[0][1]
+            print "> " + msg
+
+            serIn = readSerial()
+            print "Arduino Response:"
+            print "> " + serIn
+            print
+            print
+            if emergState == True:
+                print "!!!! EMERGENCY BEGIN !!!!"
+                print "Skipping current drink..."
+                print "Will wait until Go button is pressed..."
+                while True:
+                    if ser.read() == '!':
+                        break
+                print "!!!! EMERGENCY FINISH !!!!"
+                print
+                emergState = False
+                return False
+
+
+
+    """# Loop through all drinks in list
     for d in order['drinkList']:
         ser.write('L')
         print 'L,'
@@ -139,6 +209,8 @@ def fillOrder(order, ser):
         serIn = readSerial()
         print "Arduino Reponse:"
         print "> " + serIn
+        print
+        print
         if emergState == True:
             print
             print "!!!! EMERGENCY BEGIN !!!!"
@@ -146,12 +218,7 @@ def fillOrder(order, ser):
             print "Will wait until Go button pressed..."
             print "!!!! EMERGENCY FINISH !!!!"
             print
-            return False
-
-        print "Arduino Response:"
-        print "> " + serIn
-        print
-        print
+            return False"""
 
     # Wait for liquid to clear tubes
     time.sleep(5)
@@ -235,14 +302,13 @@ def readSerial(ser):
     "
     " @return: input char
     """
-    while 1:
-        serIn = ser.read()
+    serIn = ser.read()
 
-        if serIn == '!':
-           emergState = True
-           return serIn
-        else:
-            return serIn
+    if serIn == '!':
+        emergState = True
+        return serIn
+    else:
+        return serIn
 
 def main():
     try:
@@ -275,16 +341,35 @@ def main():
                     if fillOrder(currentOrder, ser):
                         markOrderComplete()
                     
-                        #numDrinks = numDrinks + 1
+                        numDrinks = numDrinks + 1
                         print '\n\nOrder complete\n\n'
 
-                        # Get confirmation to start next drink
+                        """# Get confirmation to start next drink
                         ser.write('B')
                         while ser.read() != '!':
-                            time.sleep(0.5)
+                            time.sleep(0.5)"""
                     else:
-                        print '\n\nFailed to make order\n\n'
-            """if numDrinks >= 6:
+                        # Reset environment since Emergency happened
+                        numDrinks = 0
+                        markOrderComplete()
+                        print "Failed to make order"
+                        print "Reseting Environment"
+                        print
+                        print "Command Arduino to:"
+                        print "> Reset Tray"
+                        ser.write('R')
+                        serIn = serialRead()
+                        print
+                        print "Arduino Response:"
+                        print "> " + serIn
+                        if serIn == '!':
+                            while True:
+                                if ser.read() == '!':
+                                    emergState = False
+                                    break
+                        
+                        
+            if numDrinks >= 6:
                 print "Six drinks have been made"
                 print "Command Arduino to:"
                 print "> Get start button press"
@@ -296,7 +381,7 @@ def main():
                     numDrinks = 0
                     print "\nDrink count zeroed out\n"
                 else:
-                    print "\n\nError getting user button press\n\n"""
+                    print "\n\nError getting user button press\n\n"
             time.sleep(2)
         print '\n\nController exited\n\n'
     except KeyboardInterrupt:
