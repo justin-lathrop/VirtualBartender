@@ -55,6 +55,8 @@ baudRate = '115200'
 drinks = {"Cherry": '0', "Orange": '1', "Grape": '2',
           "Lemonade": '3', "Strawberry": '4', "RaspberryLemonade": '5',
           "TropicalPunch": '6'}
+drinkNames = ["Cherry", "Orange", "Grape", "Lemonade", "Strawberry",
+              "RaspberryLemonade", "TropicalPunch"]
 emergState = False
 
 
@@ -159,6 +161,22 @@ def updateDrinkAmounts(List, amount):
     return List
 
 
+def getAmount(name, List):
+    """
+    " Finds the drink name in the List
+    " and returns amount value.
+    "
+    " @param: string drink name,
+    "   List of drinks
+    "
+    " @return: Int amount
+    """
+    for d in List:
+        if d['drink'] == name:
+            return d['amount']
+    return 0
+
+
 def fillOrder(order, ser):
     """
     " Fills the order of a drink and 
@@ -181,12 +199,13 @@ def fillOrder(order, ser):
         count = 0
         msg = ''
         amount = 0
+        strDrinks = str(order['drinkList'])
 
-        for d in drinks:
+        for index, d in enumerate(drinks):
             if count >= 3:
                 msg = msg + '0'
             else:
-                if d  (drink name) is in order['drinkList']:
+                if (drinkNames[index] in strDrinks) and (getAmount(drinkNames[index], order['drinkList']) > 0):
                     msg = msg + '1'
                     count = count + 1
                 else:
@@ -215,70 +234,7 @@ def fillOrder(order, ser):
             print
             return False
 
-
-
-
-
-    """# Create list of drinks
-    drinks = {}
-    for d in order['drinkList']:
-        drinks[ d['name'] ] = int( d['amount'] )
-    # Create a sorted list holding tuples for drink
-    # names and amounts in type int
-    drinks = sorted(drinks.iteritems(), key=operator.itemgetter(1))
-
-    while len(drinks) > 0:
-        if listDone(drinks):
-            break
-        else:
-            # Clean up the drinks list
-            for index, d in enumerate(drinks):
-                if d[1] == 0:
-                    del drinks[index]
-
-            # Send parallel order request for next liquid amount
-            # to be served
-            print "Command Arduino to:"
-            print "> Dispense Parallel liquids"
-            msg = ''
-            ser.write('P')
-            drinkOnCount = 0
-            for d in order['drinklist']:
-                if not [(x,y) for x, y in drinks if x == d['name']]:
-                    msg = msg + '0'
-                    ser.write('0')
-                else:
-                    if count < 3:
-                        msg = msg + '1'
-                        ser.write('1')
-                        count = count + 1
-                        
-                    else:
-                        
-            # Finally put the amount for all to be served on the end
-            ser.write( str(drinks[0][1]) )
-            msg = drinks[0][1]
-            print "> " + msg
-
-            serIn = readSerial(ser)
-            print "Arduino Response:"
-            print "> " + serIn
-            print
-            print
-            if emergState == True:
-                print "!!!! EMERGENCY BEGIN !!!!"
-                print "Skipping current drink..."
-                print "Will wait until Go button is pressed..."
-                while True:
-                    if ser.read() == '!':
-                        break
-                print "!!!! EMERGENCY FINISH !!!!"
-                print
-                emergState = False
-                return False"""
-
-
-    # Loop through all drinks in list
+    """# Loop through all drinks in list
     for d in order['drinkList']:
         if not emergState:
             ser.write('L')
@@ -307,7 +263,7 @@ def fillOrder(order, ser):
                 print
                 return False
         else:
-            return False
+            return False"""
 
     # Wait for liquid to clear tubes
     time.sleep(5)
