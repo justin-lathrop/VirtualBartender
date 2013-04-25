@@ -178,7 +178,7 @@ def fillOrder(order, ser):
             msg = drinks[0][1]
             print "> " + msg
 
-            serIn = readSerial()
+            serIn = readSerial(ser)
             print "Arduino Response:"
             print "> " + serIn
             print
@@ -210,7 +210,7 @@ def fillOrder(order, ser):
         print "> Dispense Liquid " + d['drink']
         print "> Amount " + d['amount']
 
-        serIn = readSerial()
+        serIn = readSerial(ser)
         print "Arduino Reponse:"
         print "> " + serIn
         print
