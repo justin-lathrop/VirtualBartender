@@ -173,7 +173,7 @@ def getAmount(name, List):
     """
     for d in List:
         if d['drink'] == name:
-            return d['amount']
+            return int(d['amount'])
     return 0
 
 
