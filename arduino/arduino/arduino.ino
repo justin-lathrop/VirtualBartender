@@ -270,7 +270,7 @@ boolean resetTray(){
 boolean parallel(char *drinks, int amount){
   if(emergState) return false;
   int i = 0;
-  double time = getTime(amount);
+  double time = amount;//getTime(amount);
   
   for(i = 0; i < 7; i++){
     if((drinks[i] != '1') && (drinks[i] != '0')){
@@ -403,7 +403,7 @@ boolean dispenseLiquid(int liquid, int servings){
 
   if((liquid >= 0) && (amount >= 1)){
     digitalWrite(PIN_LIQUID[liquid], HIGH);
-    Delay(getTime(amount) * 1000.0);
+    Delay(servings * 1000);//getTime(amount) * 1000.0);
     digitalWrite(PIN_LIQUID[liquid], LOW);
   }else{
     return false;
