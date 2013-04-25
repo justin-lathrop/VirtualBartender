@@ -114,10 +114,49 @@ def listDone(List, val):
     "
     " @return: boolean
     """
-    for x in list:
+    for x in List:
         if x[1] != val:
             return False
     return True
+
+
+def smallestDrinkAmount(List):
+    """
+    " Given a list of drinks
+    " find the smallest of the
+    " amounts and return it.
+    "
+    " @param: List of drinks
+    "
+    " @return: int smallest amount
+    """
+    # 9 is the max amount for a drink
+    # serving size
+    amount = 9
+    
+    for d in List:
+        if int(d['amount']) < amount:
+            amount = int(d['amount'])
+    return amount
+
+
+def updateDrinkAmounts(List, amount):
+    """
+    " Will subtract the smallest
+    " amount from each item in
+    " the list unless the item's
+    " amount is already equal to
+    " zero or less.
+    "
+    " @param: List of drinkItems, and
+    "   int of amount to subtract.
+    "
+    " @return: Updated List
+    """
+    for i in List:
+        if int(i['amount']) > 0:
+            i['amount'] = str( int(i['amount']) - amount )
+    return List
 
 
 def fillOrder(order, ser):
@@ -136,6 +175,33 @@ def fillOrder(order, ser):
     " False if unsuccessful.
     """
     print 'Filling order <' + order['title'] + '>'
+
+
+    while not listDone(order['drinkList'], '0'):
+        count = 0
+        msg = ''
+        amount = 0
+
+        for d in drinks:
+            if count >= 3:
+                msg = msg + '0'
+            else:
+                if d  (drink name) is in order['drinkList']:
+                    msg = msg + '1'
+                    count = count + 1
+                else:
+                    msg = msg + '0'
+
+        amount = smallestDrinkAmount(order['drinkList'])
+        order['drinkList'] = updateDrinkAmounts(order['drinkList'], amount)
+        msg = msg + str(amount)
+        ser.write(msg)
+        
+        serialRead stuff
+
+
+
+
 
     """# Create list of drinks
     drinks = {}
