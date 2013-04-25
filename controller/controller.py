@@ -213,7 +213,7 @@ def fillOrder(order, ser):
 
         amount = smallestDrinkAmount(order['drinkList'])
         order['drinkList'] = updateDrinkAmounts(order['drinkList'], amount)
-        msg = msg + str(amount)
+        msg = 'P' + msg + str(amount)
         ser.write(msg)
         
         print "Command Arduino to:"
