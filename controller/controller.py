@@ -45,7 +45,6 @@ import os
 import json
 import traceback
 import sys
-from fractions import gcd
 import operator
 
 orderDir = './Orders'
@@ -53,9 +52,9 @@ completedDir = './OrdersCompleted'
 adminDir = './Admin'
 serialDevice = '/dev/ttyACM0'
 baudRate = '115200'
-drinks = {"A": '0', "B": '1', "C": '2',
-          "D": '3', "E": '4', "F": '5',
-          "G": '6'}
+drinks = {"Cherry": '0', "Orange": '1', "Grape": '2',
+          "Lemonade": '3', "Strawberry": '4', "RaspberryLemonade": '5',
+          "TropicalPunch": '6'}
 emergState = False
 
 
@@ -138,7 +137,7 @@ def fillOrder(order, ser):
     """
     print 'Filling order <' + order['title'] + '>'
 
-    # Create list of drinks
+    """# Create list of drinks
     drinks = {}
     for d in order['drinkList']:
         drinks[ d['name'] ] = int( d['amount'] )
@@ -161,13 +160,19 @@ def fillOrder(order, ser):
             print "> Dispense Parallel liquids"
             msg = ''
             ser.write('P')
+            drinkOnCount = 0
             for d in order['drinklist']:
                 if not [(x,y) for x, y in drinks if x == d['name']]:
                     msg = msg + '0'
                     ser.write('0')
                 else:
-                    msg = msg + '1'
-                    ser.write('1')
+                    if count < 3:
+                        msg = msg + '1'
+                        ser.write('1')
+                        count = count + 1
+                        
+                    else:
+                        
             # Finally put the amount for all to be served on the end
             ser.write( str(drinks[0][1]) )
             msg = drinks[0][1]
@@ -188,11 +193,10 @@ def fillOrder(order, ser):
                 print "!!!! EMERGENCY FINISH !!!!"
                 print
                 emergState = False
-                return False
+                return False"""
 
 
-
-    """# Loop through all drinks in list
+    # Loop through all drinks in list
     for d in order['drinkList']:
         ser.write('L')
         print 'L,'
@@ -218,7 +222,7 @@ def fillOrder(order, ser):
             print "Will wait until Go button pressed..."
             print "!!!! EMERGENCY FINISH !!!!"
             print
-            return False"""
+            return False
 
     # Wait for liquid to clear tubes
     time.sleep(5)
