@@ -117,7 +117,7 @@ def listDone(List, val):
     " @return: boolean
     """
     for x in List:
-        if x[1] != val:
+        if int(x['amount']) != val:
             return False
     return True
 
@@ -195,7 +195,7 @@ def fillOrder(order, ser):
     print 'Filling order <' + order['title'] + '>'
 
 
-    while not listDone(order['drinkList'], '0'):
+    while not listDone(order['drinkList'], 0):
         count = 0
         msg = ''
         amount = 0
