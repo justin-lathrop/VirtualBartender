@@ -139,7 +139,7 @@ def smallestDrinkAmount(List):
     for d in List:
         if (int(d['amount']) < amount) and (int(d['amount']) > 0):
             amount = int(d['amount'])
-    return 0
+    return amount
 
 
 def updateDrinkAmounts(List, amount):
