@@ -4,11 +4,11 @@
 	"drinkList": [
 		{
 			"drink": "Lemonade",
-			"amount": "8"
+			"amount": "3"
 		},
 		{
 			"drink": "RapberryLemonade",
-			"amount": "9"
+			"amount": "5"
 		}
     ],
     "alcoholPerc": "60%"

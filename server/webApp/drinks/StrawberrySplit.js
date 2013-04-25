@@ -4,15 +4,15 @@
 	"drinkList": [
 		{
 			"drink": "Strawberry",
-			"amount": "9"
+			"amount": "4"
 		},
 		{
 			"drink": "TropicalPunch",
-			"amount": "5"
+			"amount": "2"
 		},
 		{
 			"drink": "Lemonade",
-			"amount": "5"
+			"amount": "2"
 		}
     ],
     "alcoholPerc": "60%"

@@ -4,15 +4,15 @@
 	"drinkList": [
 		{
 			"drink": "RaspberryLemonade",
-			"amount": "8"
+			"amount": "3"
 		},
 		{
 			"drink": "Strawberry",
-			"amount": "8"
+			"amount": "3"
 		},
 		{
 			"drink": "Orange",
-			"amount": "4"
+			"amount": "2"
 		}
     ],
     "alcoholPerc": "60%"

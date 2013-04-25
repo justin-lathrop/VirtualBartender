@@ -4,23 +4,23 @@
 	"drinkList": [
 		{
 			"drink": "TropicalPunch",
-			"amount": "4"
+			"amount": "1"
 		},
 		{
 			"drink": "Strawberry",
-			"amount": "4"
+			"amount": "2"
 		},
 		{
 			"drink": "Cherry",
-			"amount": "4"
+			"amount": "2"
 		},
 		{
 			"drink": "Orange",
-			"amount": "4"
+			"amount": "2"
 		},
 		{
 			"drink": "Grape",
-			"amount": 4
+			"amount": "2"
 		}
     ],
     "alcoholPerc": "60%"

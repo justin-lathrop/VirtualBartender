@@ -4,11 +4,11 @@
 	"drinkList": [
 		{
 			"drink": "Cherry",
-			"amount": "9"
+			"amount": "5"
 		},
 		{
 			"drink": "Strawberry",
-			"amount": "8"
+			"amount": "3"
 		}
     ],
     "alcoholPerc": "60%"
