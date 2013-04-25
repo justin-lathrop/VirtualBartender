@@ -197,7 +197,23 @@ def fillOrder(order, ser):
         msg = msg + str(amount)
         ser.write(msg)
         
-        serialRead stuff
+        print "Command Arduino to:"
+        print "> Dispense Liquid in Parallel"
+        print "> " + msg
+
+        serIn = readSerial(ser)
+        print "Arduino Reponse:"
+        print "> " + serIn
+        print
+        print
+        if emergState:
+            print
+            print "!!!! EMERGENCY BEGIN !!!!"
+            print "Skipping current drink..."
+            print "Will wait until Go button pressed..."
+            print "!!!! EMERGENCY FINISH !!!!"
+            print
+            return False
 
 
 
