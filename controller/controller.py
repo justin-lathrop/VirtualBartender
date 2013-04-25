@@ -200,14 +200,14 @@ def fillOrder(order, ser):
     for d in order['drinkList']:
         ser.write('L')
         print 'L,'
-        ser.write(drinks[ d['name'] ])
-        print drinks[ d['name'] ] + ','
+        ser.write(drinks[ d['drink'] ])
+        print drinks[ d['drink'] ] + ','
         ser.write(d['amount'])
         print d['amount']
         print
         
         print "Command Arduino to:"
-        print "> Dispense Liquid " + d['name']
+        print "> Dispense Liquid " + d['drink']
         print "> Amount " + d['amount']
 
         serIn = readSerial()

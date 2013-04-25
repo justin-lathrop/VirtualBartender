@@ -45,8 +45,7 @@
                 
                 $("#drinksIncluded").empty();
                 for(var i = 0; i < data.drinkList.length; i++){
-                    //alert(data.drinkList[i].name);
-                    $("#drinksIncluded").append(data.drinkList[i].name + ", " + data.drinkList[i].amount + " ounces.<br />");
+                    $("#drinksIncluded").append(data.drinkList[i].drink + ", " + data.drinkList[i].amount + " seconds.<br />");
                 }// for
 
                 $("#alcoholPercentage").empty().append("Aclohol Percentage: " + data.alcoholPerc);

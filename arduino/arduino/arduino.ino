@@ -38,7 +38,7 @@ char drinks[7] = {'a', 'a', 'a', 'a', 'a', 'a', 'a'};
 volatile boolean emergState = false;
 boolean started = false;
 const int MIXER_DISTANCE = 100;
-const int PIN_TRAY[4] = {15, 16, 17, 18};
+const int PIN_TRAY[4] = {14, 15, 16, 17};
 const int PIN_LIQUID[7] = {41, 43, 45, 47, 49, 51, 46};
 const int PIN_START_BTN = 7;
 const int PIN_EMERG_BTN = 2;
@@ -50,8 +50,7 @@ const int PHOTO_SENSOR_LIMIT = 700;
 //   360 / 1.8 = 200 steps
 const double stepDegree_tray = 1.8;
 const int stepsPerRevolution_tray = (int) 360 / stepDegree_tray;
-Stepper myStepper_tray(stepsPerRevolution_trayT1
-, PIN_TRAY[0], PIN_TRAY[1], PIN_TRAY[2], PIN_TRAY[3]);
+Stepper myStepper_tray(stepsPerRevolution_tray, PIN_TRAY[0], PIN_TRAY[1], PIN_TRAY[2], PIN_TRAY[3]);
 
 void steps_tray(int d, int n){
   int i = 0;
@@ -270,7 +269,7 @@ boolean resetTray(){
 boolean parallel(char *drinks, int amount){
   if(emergState) return false;
   int i = 0;
-  double time = amount;//getTime(amount);
+  double time = getTime(amount);
   
   for(i = 0; i < 7; i++){
     if((drinks[i] != '1') && (drinks[i] != '0')){
@@ -403,7 +402,7 @@ boolean dispenseLiquid(int liquid, int servings){
 
   if((liquid >= 0) && (amount >= 1)){
     digitalWrite(PIN_LIQUID[liquid], HIGH);
-    Delay(servings * 1000);//getTime(amount) * 1000.0);
+    Delay(getTime(amount) * 1000.0);
     digitalWrite(PIN_LIQUID[liquid], LOW);
   }else{
     return false;
