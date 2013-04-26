@@ -142,7 +142,7 @@ def smallestDrinkAmount(List):
     return amount
 
 
-def updateDrinkAmounts(List, amount):
+def updateDrinkAmounts(List, amount, index):
     """
     " Will subtract the smallest
     " amount from each item in
@@ -156,7 +156,7 @@ def updateDrinkAmounts(List, amount):
     " @return: Updated List
     """
     for i in List:
-        if int(i['amount']) > 0:
+        if (int(i['amount']) > 0) and (drinkNames[index] == i['name']):
             print "Update Drink Amounts: "
             print "before " + i['amount']
             i['amount'] = str( int(i['amount']) - amount )
@@ -201,7 +201,7 @@ def fillOrder(order, ser):
     while not listDone(order['drinkList'], 0):
         count = 0
         msg = ''
-        amount = 0
+        amount = smallestDrinkAmount(order['drinkList'])
         strDrinks = str(order['drinkList'])
 
         for index, d in enumerate(drinks):
@@ -211,11 +211,10 @@ def fillOrder(order, ser):
                 if (drinkNames[index] in strDrinks) and (getAmount(drinkNames[index], order['drinkList']) > 0):
                     msg = msg + '1'
                     count = count + 1
+                    order['drinkList'] = updateDrinkAmounts(order['drinkList'], amount, index)
                 else:
                     msg = msg + '0'
 
-        amount = smallestDrinkAmount(order['drinkList'])
-        order['drinkList'] = updateDrinkAmounts(order['drinkList'], amount)
         msg = 'P' + msg + str(amount)
         ser.write(msg)
         
