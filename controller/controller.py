@@ -489,7 +489,7 @@ def main():
         print 'Exiting...'
     except Exception:
         traceback.print_exc(file=sys.stdout)
-    t.exit(0)
+    #t.exit(0)
     sys.exit(0)
 
 
