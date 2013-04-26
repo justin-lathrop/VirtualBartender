@@ -497,9 +497,7 @@ def main():
             if serIn == '1':
                 break
             elif serIn == '0':
-                serSem.acquire()
-                serIn = ser.read()
-                serSem.release()
+                serIn = readSerial()
         print
         print "Arduino Response:"
         print "> " + serIn
