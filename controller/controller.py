@@ -63,7 +63,7 @@ responseQueue = ''
 emergSem = threading.BoundedSemaphore()
 serSem = threading.BoundedSemaphore()
 respSem = threading.BoundedSemaphore()
-ser = serial.Serial(serialDevice, baudRate)#, timeout=0
+ser = serial.Serial(serialDevice, baudRate, timeout=0)
 
 
 def markOrderComplete():
