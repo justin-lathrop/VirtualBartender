@@ -430,13 +430,16 @@ def serialMonitor(name):
                     print 'R'
                     serSem.release()
                     print "before"
-                    #serIn = readSerial()
                     while True:
                         serSem.acquire()
                         serIn = ser.read()
                         serSem.release()
                         if serIn == '1':
                             break
+                        elif serIn == '0':
+                            serSem.acquire()
+                            ser.write('R')
+                            serSem.release()
                     print "after"
                     print
                     print "Arduino Response:"
@@ -490,6 +493,13 @@ def main():
         ser.write('R')
         serSem.release()
         serIn = readSerial()
+        while True:
+            if serIn == '1':
+                break
+            elif serIn == '0':
+                serSem.acquire()
+                serIn = ser.read()
+                serSem.release()
         print
         print "Arduino Response:"
         print "> " + serIn
@@ -524,6 +534,7 @@ def main():
                     serSem.acquire()
                     ser.write('B')
                     serSem.release()
+                    time.sleep(2)
                     serIn = readSerial()
                     if serIn == '1':
                         print "Arduino Response:"
