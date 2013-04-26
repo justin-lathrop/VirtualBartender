@@ -383,7 +383,7 @@ def main():
         print "Command Arduino to:"
         print "> Reset Tray"
         ser.write('R')
-        serIn = serialRead(ser)
+        serIn = readSerial(ser)
         print
         print "Arduino Response:"
         print "> " + serIn
@@ -421,7 +421,7 @@ def main():
                         print "Command Arduino to:"
                         print "> Reset Tray"
                         ser.write('R')
-                        serIn = serialRead()
+                        serIn = readSerial(ser)
                         print
                         print "Arduino Response:"
                         print "> " + serIn
@@ -433,7 +433,7 @@ def main():
                 print "Command Arduino to:"
                 print "> Get start button press"
                 ser.write('B')
-                serIn = ser.read()
+                serIn = readSerial(ser)
                 if serIn == '1':
                     print "Arduino Response:"
                     print "> " + serIn
