@@ -358,8 +358,8 @@ def readSerial():
             respSem.release()
             if len(temp) > 0:
                 return temp[0]
-        else:
-            return False
+        #else:
+            #return False
         time.sleep(0.2)
     return False
 
@@ -431,7 +431,7 @@ def serialMonitor(name):
             print
         else:
             respSem.acquire()
-            responseQueue = responseQueue + serIn if len(serIn) > 0 else ''
+            responseQueue = responseQueue + serIn if len(serIn) > 0 else '-' ############
             print "[" + responseQueue + "] responseQueue from monitor thread"
             respSem.release()
         time.sleep(0.2)
