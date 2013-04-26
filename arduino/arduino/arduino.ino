@@ -286,7 +286,8 @@ boolean parallel(char *drinks, int amount){
     }
   }
 
-  Delay(time * 1000);
+  //Delay(time * 1000);
+  Delay(amount * 1000);
 
   for(i = 0; i < 7; i++){
     digitalWrite(PIN_LIQUID[i], LOW);
@@ -402,7 +403,8 @@ boolean dispenseLiquid(int liquid, int servings){
 
   if((liquid >= 0) && (amount >= 1)){
     digitalWrite(PIN_LIQUID[liquid], HIGH);
-    Delay(getTime(amount) * 1000.0);
+    //Delay(getTime(amount) * 1000.0);
+    Delay(amount * 1000);
     digitalWrite(PIN_LIQUID[liquid], LOW);
   }else{
     return false;
