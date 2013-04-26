@@ -231,7 +231,7 @@ def fillOrder(order):
 
         msg = 'P' + msg + str(amount)
         emergSem.acquire()
-        temp = emergSem
+        temp = emergState
         emergSem.release()
         print temp + " -----as;dfjkas;lfjka;sdfjkla;sdjklfa;lskj"
         if temp:
