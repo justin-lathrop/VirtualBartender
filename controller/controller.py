@@ -435,7 +435,7 @@ def serialMonitor(name):
                         serSem.acquire()
                         serIn = ser.read()
                         serSem.release()
-                        if serIn == '!':
+                        if serIn == '1':
                             break
                     print "after"
                     print
