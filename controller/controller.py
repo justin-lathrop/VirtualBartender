@@ -233,6 +233,7 @@ def fillOrder(order):
         emergSem.acquire()
         temp = emergSem
         emergSem.release()
+        print temp + " -----as;dfjkas;lfjka;sdfjkla;sdjklfa;lskj"
         if temp:
             return False
         serSem.acquire()
