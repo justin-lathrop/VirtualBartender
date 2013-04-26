@@ -358,7 +358,6 @@ def readSerial():
             if len(temp) > 0:
                 string = temp[0]
                 temp = temp[1:]
-                print string
                 return string
         else:
             return False
@@ -396,9 +395,7 @@ def serialMonitor(name):
         serSem.release()
         if serIn == '!':
             emergSem.acquire()
-            print str(emergState)
             emergState = False
-            print str(emergState)
             emergSem.release()
             break
 
@@ -421,9 +418,6 @@ def serialMonitor(name):
                 serIn = ser.read()
                 serSem.release()
                 if serIn == '!':
-                    emergSem.acquire()
-                    emergState = False
-                    emergSem.release()
                     respSem.acquire()
                     responseQueue = ''
                     respSem.release()
@@ -431,13 +425,20 @@ def serialMonitor(name):
                     print "Command Arduino to:"
                     print "> Reset Tray"
                     serSem.acquire()
+                    print 'R'
                     ser.write('R')
+                    print 'R'
                     serSem.release()
+                    print "before"
                     serIn = readSerial()
+                    print "after"
                     print
                     print "Arduino Response:"
                     print "> " + str(serIn)
                     print
+                    emergSem.acquire()
+                    emergState = False
+                    emergSem.release()
                     break
                 time.sleep(0.2)
             print "!!!! EMERGENCY FINISH !!!!"
