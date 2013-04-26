@@ -430,7 +430,7 @@ def serialMonitor(name):
             print
         else:
             respSem.acquire()
-            responseQueue = responseQueue + serIn
+            responseQueue = responseQueue + serIn if len(serIn) > 0 else ''
             respSem.release()
         time.sleep(0.2)
 
