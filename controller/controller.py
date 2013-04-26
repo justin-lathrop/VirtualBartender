@@ -428,6 +428,17 @@ def serialMonitor(name):
                     respSem.acquire()
                     responseQueue = ''
                     respSem.release()
+                    print
+                    print "Command Arduino to:"
+                    print "> Reset Tray"
+                    serSem.acquire()
+                    ser.write('R')
+                    serSem.release()
+                    serIn = readSerial()
+                    print
+                    print "Arduino Response:"
+                    print "> " + str(serIn)
+                    print
                     break
                 time.sleep(0.2)
             print "!!!! EMERGENCY FINISH !!!!"
@@ -500,22 +511,6 @@ def main():
                             markOrderComplete()
                             print "Failed to make order"
                             print "Reseting Environment"
-                            while True:
-                                emergSem.acquire()
-                                state = emergState
-                                emergSem.release()
-                                if not state:
-                                    print
-                                    print "Command Arduino to:"
-                                    print "> Reset Tray"
-                                    serSem.acquire()
-                                    ser.write('R')
-                                    serSem.release()
-                                    serIn = readSerial()
-                                    print
-                                    print "Arduino Response:"
-                                    print "> " + str(serIn)
-                                    break
                             
                 if numDrinks >= 6:
                     print "Six drinks have been made"
