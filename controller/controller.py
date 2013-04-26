@@ -38,7 +38,8 @@
 "   - other => stdout
 "   - logging => logs.log (current dir)
 """
-
+import thread
+import threading
 import serial
 import time
 import os
@@ -57,7 +58,10 @@ drinks = {"Cherry": '0', "Orange": '1', "Grape": '2',
           "TropicalPunch": '6'}
 drinkNames = ["Cherry", "Orange", "Grape", "Lemonade", "Strawberry",
               "RaspberryLemonade", "TropicalPunch"]
-emergState = False
+emergState = True
+responseQueue = ''
+semaphore = threading.BoundedSemaphore()
+ser = serial.Serial(serialDevice, baudRate)#, timeout=0
 
 
 def markOrderComplete():
@@ -177,7 +181,7 @@ def getAmount(name, List):
     return 0
 
 
-def fillOrder(order, ser):
+def fillOrder(order):
     """
     " Fills the order of a drink and 
     " is in charge of sending commands 
@@ -192,10 +196,17 @@ def fillOrder(order, ser):
     " @return: True is successful and 
     " False if unsuccessful.
     """
+    global emergState
+    global responseQueue
     print 'Filling order <' + order['title'] + '>'
 
 
     while not listDone(order['drinkList'], 0):
+        semaphore.acquire()
+        if emergState:
+            semaphore.release()
+            return False
+        semaphore.release()
         count = 0
         msg = ''
         amount = smallestDrinkAmount(order['drinkList'])
@@ -213,78 +224,49 @@ def fillOrder(order, ser):
                     msg = msg + '0'
 
         msg = 'P' + msg + str(amount)
+        semaphore.acquire()
+        if emergState:
+            semaphore.release()
+            return False
         ser.write(msg)
+        semaphore.release()
         
         print "Command Arduino to:"
         print "> Dispense Liquid in Parallel"
         print "> " + msg
 
-        serIn = readSerial(ser)
+        serIn = readSerial()
+        semaphore.acquire()
+        if emergState:
+            semaphore.release()
+            return False
+        semaphore.release()
         print "Arduino Reponse:"
         print "> " + serIn
         print
-        print
-        if emergState:
-            print
-            print "!!!! EMERGENCY BEGIN !!!!"
-            print "Skipping current drink..."
-            print "Will wait until Go button pressed..."
-            print "!!!! EMERGENCY FINISH !!!!"
-            print
-            return False
-
-    """# Loop through all drinks in list
-    for d in order['drinkList']:
-        if not emergState:
-            ser.write('L')
-            print 'L,'
-            ser.write(drinks[ d['drink'] ])
-            print drinks[ d['drink'] ] + ','
-            ser.write(d['amount'])
-            print d['amount']
-            print
-        
-            print "Command Arduino to:"
-            print "> Dispense Liquid " + d['drink']
-            print "> Amount " + d['amount']
-
-            serIn = readSerial(ser)
-            print "Arduino Reponse:"
-            print "> " + serIn
-            print
-            print
-            if emergState:
-                print
-                print "!!!! EMERGENCY BEGIN !!!!"
-                print "Skipping current drink..."
-                print "Will wait until Go button pressed..."
-                print "!!!! EMERGENCY FINISH !!!!"
-                print
-                return False
-        else:
-            return False"""
 
     # Wait for liquid to clear tubes
-    time.sleep(5)
+    time.sleep(3)
 
     # Turn tray to next position
+    semaphore.acquire()
+    if emergState:
+        semaphore.release()
+        return False
+    semaphore.release()
     print "Command Arduino to:"
     print "> Move tray 1 position"
-
     ser.write('T')
     ser.write('1')
-    serIn = ser.read()
+    serIn = readSerial()
+    semaphore.acquire()
+    if emergState:
+        semaphore.release()
+        return False
+    semaphore.release()
     print "Arduino Response:"
     print "> " + serIn
-    if emergState:
-        print
-        print "!!!! EMERGENCY BEGIN !!!!"
-        print "Skipping current drink..."
-        print "Will wait until Go button pressed..."
-        print "!!!! EMERGENCY FINISH !!!!"
-        print
-        return False
-
+    print
     return True
 
 
@@ -303,7 +285,7 @@ def admin():
         return False
 
 
-def fillAdminReq(ser):
+def fillAdminReq():
     """
     " Speaks to arduino for admin
     " simply printing out what
@@ -337,53 +319,106 @@ def fillAdminReq(ser):
         os.remove(adminDir + '/' + el)
 
 
-def readSerial(ser):
+def readSerial():
     """
-    " Reads serial input
-    " from the Arduino and then
-    " checks the input for errors
-    " or an emergency state.  If
-    " emergency state occurs then
-    " abort current drink and wait
-    " for emergency state to end.
+    " Reads from serial queue and
+    " returns the next response from
+    " the Arduino.  Should never be
+    " the emergency response '!'.  If
+    " no responses in the queue then
+    " will busy wait until a response.
     "
-    " @param: configured Serial obj
-    "
-    " @return: input char
+    " @return: input char or False if
+    " in emergency state.
     """
-    serIn = ser.read()
+    global emergState
+    global responseQueue
+    
+    semaphore.acquire()
+    while not emergState:
+        if len(responseQueue) > 0:
+            return responseQueue[0]
+        semaphore.release()
+        time.sleep(0.2)
+    semaphore.release()
+    return False
 
-    if serIn == '!':
-        emergState = True
-        return serIn
-    else:
-        return serIn
+
+def serialMonitor(name):
+    """
+    " Thread function for serial
+    " monitoring.  Will watch
+    " serial port and update the
+    " serial queue when input from
+    " the Arduino is made.
+    """
+    global emergState
+    global responseQueue
+    
+    time.sleep(2)
+    semaphore.acquire()
+    ser.flush()
+    ser.flushInput()
+    ser.flushOutput()
+    semaphore.release()
+    print "Serial Monitor Thread Initialized"
+
+    semaphore.acquire()
+    while ser.read() != '!':
+        emergState = False
+        semaphore.release()
+
+    # Loop forever reading the serial port and
+    # updating the responseQueue
+    while True:
+        semaphore.acquire()
+        serIn = ser.read()
+        semaphore.release()
+        if serIn == '!':
+            semaphore.acquire()
+            emergState = True
+            semaphore.release()
+            print
+            print "!!!! EMERGENCY BEGIN !!!!"
+            print "Skipping current drink..."
+            print "Will wait until Go button pressed..."
+            semaphore.acquire()
+            while ser.read() != '!':
+                time.sleep(0.2)
+            emergState = False
+            responseQueue = ''
+            semaphore.release()
+            print "!!!! EMERGENCY FINISH !!!!"
+            print
+        else:
+            semaphore.acquire()
+            responseQueue = responseQueue + serIn
+            semaphore.release()
+        time.sleep(0.2)
+
 
 def main():
+    global emergState
+    global responseQueue
+    
     try:
         print 'Initializing Controller'
         numDrinks = 0
-        ser = serial.Serial(serialDevice, baudRate)
-        time.sleep(2)
-        ser.flush()
-        ser.flushInput()
-        ser.flushOutput()
+        try:
+            t = thread.start_new_thread(serialMonitor, ("SerialMonitor", ))
+        except:
+            print "Error initializing Serial Monitor Thread"
 
         # Wait until start button is pressed
-        while ser.read() != '!':
-            time.sleep(0.5)
-    
-        ser.flush()
-        ser.flushInput()
-        ser.flushOutput()
+        while emergState:
+            time.sleep(0.2)
 
         print 'Initialization Complete'
         print
-
         print "Command Arduino to:"
         print "> Reset Tray"
         ser.write('R')
-        serIn = readSerial(ser)
+        serIn = readSerial()
         print
         print "Arduino Response:"
         print "> " + serIn
@@ -391,56 +426,49 @@ def main():
 
         # Loop forever filling orders
         while 1:
-            if admin():
-                fillAdminReq(ser)
-            else:
-                currentOrder = getNextOrder()
-                if currentOrder != False:
-                    if fillOrder(currentOrder, ser):
-                        markOrderComplete()
-                    
-                        numDrinks = numDrinks + 1
-                        print '\n\nOrder complete\n\n'
-
-                        """# Get confirmation to start next drink
-                        ser.write('B')
-                        while ser.read() != '!':
-                            time.sleep(0.5)"""
-                    else:
-                        # Wait until user says to begin serving again
-                        print "\nWaiting for user go button...\n"
-                        while ser.read() != '!':
-                            time.sleep(0.5)
-
-                        # Reset environment since Emergency happened
-                        numDrinks = 0
-                        markOrderComplete()
-                        print "Failed to make order"
-                        print "Reseting Environment"
-                        print
-                        print "Command Arduino to:"
-                        print "> Reset Tray"
-                        ser.write('R')
-                        serIn = readSerial(ser)
-                        print
+            semaphore.acquire()
+            state = emergState
+            semaphore.release()
+            if not state:
+                if admin():
+                    fillAdminReq()
+                else:
+                    currentOrder = getNextOrder()
+                    if currentOrder != False:
+                        if fillOrder(currentOrder):
+                            markOrderComplete()
+                            numDrinks = numDrinks + 1
+                            print '\n\nOrder complete\n\n'
+                        else:
+                            # Reset environment since Emergency happened
+                            numDrinks = 0
+                            markOrderComplete()
+                            print "Failed to make order"
+                            print "Reseting Environment"
+                            print
+                            print "Command Arduino to:"
+                            print "> Reset Tray"
+                            ser.write('R')
+                            serIn = readSerial()
+                            print
+                            print "Arduino Response:"
+                            print "> " + serIn
+                            
+                if numDrinks >= 6:
+                    print "Six drinks have been made"
+                    print "Command Arduino to:"
+                    print "> Get start button press"
+                    semaphore.acquire()
+                    ser.write('B')
+                    semaphore.release()
+                    serIn = readSerial()
+                    if serIn == '1':
                         print "Arduino Response:"
                         print "> " + serIn
-                            
-                        
-                        
-            if numDrinks >= 6:
-                print "Six drinks have been made"
-                print "Command Arduino to:"
-                print "> Get start button press"
-                ser.write('B')
-                serIn = readSerial(ser)
-                if serIn == '1':
-                    print "Arduino Response:"
-                    print "> " + serIn
-                    numDrinks = 0
-                    print "\nDrink count zeroed out\n"
-                else:
-                    print "\n\nError getting user button press\n\n"
+                        numDrinks = 0
+                        print "\nDrink count zeroed out\n"
+                    else:
+                        print "\n\nError getting user button press\n\n"
             time.sleep(2)
         print '\n\nController exited\n\n'
     except KeyboardInterrupt:
@@ -451,6 +479,7 @@ def main():
         print 'Exiting...'
     except Exception:
         traceback.print_exc(file=sys.stdout)
+    t.exit()
     sys.exit(0)
 
 
