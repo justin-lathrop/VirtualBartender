@@ -233,7 +233,6 @@ def fillOrder(order):
         emergSem.acquire()
         temp = emergState
         emergSem.release()
-        print str(temp) + " -----as;dfjkas;lfjka;sdfjkla;sdjklfa;lskj"
         if temp:
             return False
         serSem.acquire()
@@ -248,7 +247,6 @@ def fillOrder(order):
         emergSem.acquire()
         temp = emergState
         emergSem.release()
-        print str(temp)
         if temp:
             return False
         print "Arduino Reponse:"
@@ -356,7 +354,7 @@ def readSerial():
         if not temp:
             respSem.acquire()
             temp = responseQueue
-            #print "[" + temp + "] From response queue readSerial()"
+            print "[" + str(temp) + "] From response queue readSerial()"
             respSem.release()
             if len(temp) > 0:
                 return temp[0]
