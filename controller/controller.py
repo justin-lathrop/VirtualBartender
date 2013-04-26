@@ -528,7 +528,7 @@ def main():
                             print "Failed to make order"
                             print "Environment Reset"
                             
-                if numDrinks >= 6:
+                """if numDrinks >= 6:
                     print "Six drinks have been made"
                     print "Command Arduino to:"
                     print "> Get start button press"
@@ -543,7 +543,7 @@ def main():
                         numDrinks = 0
                         print "\nDrink count zeroed out\n"
                     else:
-                        print "\n\nError getting user button press\n\n"
+                        print "\n\nError getting user button press\n\n\""""
             time.sleep(2)
         print '\n\nController exited\n\n'
     except KeyboardInterrupt:
