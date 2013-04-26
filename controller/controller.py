@@ -367,6 +367,7 @@ def serialMonitor(name):
 
     semaphore.acquire()
     while ser.read() != '!':
+        print str(emergState)
         emergState = False
         semaphore.release()
 
