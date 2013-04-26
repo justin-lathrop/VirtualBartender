@@ -509,7 +509,7 @@ def main():
                             serIn = readSerial()
                             print
                             print "Arduino Response:"
-                            print "> " + serIn
+                            print "> " + str(serIn)
                             
                 if numDrinks >= 6:
                     print "Six drinks have been made"
