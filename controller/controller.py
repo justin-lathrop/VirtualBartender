@@ -354,7 +354,7 @@ def readSerial():
         if not temp:
             respSem.acquire()
             temp = responseQueue
-            print temp + " From response queue readSerial()"
+            print "[" + temp + "] From response queue readSerial()"
             respSem.release()
             if len(temp) > 0:
                 return temp[0]
@@ -432,7 +432,7 @@ def serialMonitor(name):
         else:
             respSem.acquire()
             responseQueue = responseQueue + serIn if len(serIn) > 0 else ''
-            print responseQueue + " responseQueue from monitor thread"
+            print "[" + responseQueue + "] responseQueue from monitor thread"
             respSem.release()
         time.sleep(0.2)
 
@@ -456,10 +456,10 @@ def main():
         # Wait until start button is pressed
         while True:
             emergSem.acquire()
-            if not emergState:
-                emergSem.release()
-                break
+            temp = emergState
             emergSem.release()
+            if not temp:
+                break
             time.sleep(0.2)
             
 
@@ -467,7 +467,9 @@ def main():
         print
         print "Command Arduino to:"
         print "> Reset Tray"
+        serSem.acquire()
         ser.write('R')
+        serSem.release()
         serIn = readSerial()
         print
         print "Arduino Response:"
@@ -490,7 +492,7 @@ def main():
                             numDrinks = numDrinks + 1
                             print '\n\nOrder complete\n\n'
                         else:
-                            # Reset environment since Emergency happened
+                            # Reset environment since Emergency or error happened
                             numDrinks = 0
                             markOrderComplete()
                             print "Failed to make order"
@@ -498,7 +500,9 @@ def main():
                             print
                             print "Command Arduino to:"
                             print "> Reset Tray"
+                            serSem.acquire()
                             ser.write('R')
+                            serSem.release()
                             serIn = readSerial()
                             print
                             print "Arduino Response:"
