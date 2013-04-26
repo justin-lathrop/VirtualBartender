@@ -380,6 +380,15 @@ def main():
         print 'Initialization Complete'
         print
 
+        print "Command Arduino to:"
+        print "> Reset Tray"
+        ser.write('R')
+        serIn = serialRead(ser)
+        print
+        print "Arduino Response:"
+        print "> " + serIn
+        print
+
         # Loop forever filling orders
         while 1:
             if admin():
