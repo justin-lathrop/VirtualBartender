@@ -359,7 +359,7 @@ def readSerial():
             if len(temp) > 0:
                 string = temp[0]
                 temp = temp[1:]
-                return string
+                return '1'#string
         else:
             return False
         time.sleep(0.2)
