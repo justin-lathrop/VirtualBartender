@@ -198,6 +198,7 @@ def fillOrder(order):
     """
     global emergState
     global responseQueue
+    global ser
     print 'Filling order <' + order['title'] + '>'
 
 
@@ -354,6 +355,7 @@ def serialMonitor(name):
     """
     global emergState
     global responseQueue
+    global ser
     
     time.sleep(2)
     semaphore.acquire()
@@ -400,6 +402,7 @@ def serialMonitor(name):
 def main():
     global emergState
     global responseQueue
+    global ser
     
     try:
         print 'Initializing Controller'
@@ -410,8 +413,11 @@ def main():
             print "Error initializing Serial Monitor Thread"
 
         # Wait until start button is pressed
+        semaphore.acquire()
         while emergState:
+            semaphore.release()
             time.sleep(0.2)
+        semaphore.release()
 
         print 'Initialization Complete'
         print
