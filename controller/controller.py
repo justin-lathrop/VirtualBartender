@@ -492,12 +492,15 @@ def main():
         serSem.acquire()
         ser.write('R')
         serSem.release()
-        serIn = readSerial()
         while True:
+            serIn = readSerial()
             if serIn == '1':
                 break
             elif serIn == '0':
-                serIn = readSerial()
+                serSem.acquire()
+                ser.write('R')
+                serSem.release()
+                
         print
         print "Arduino Response:"
         print "> " + serIn
