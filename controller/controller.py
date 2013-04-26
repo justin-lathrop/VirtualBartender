@@ -500,16 +500,22 @@ def main():
                             markOrderComplete()
                             print "Failed to make order"
                             print "Reseting Environment"
-                            print
-                            print "Command Arduino to:"
-                            print "> Reset Tray"
-                            serSem.acquire()
-                            ser.write('R')
-                            serSem.release()
-                            serIn = readSerial()
-                            print
-                            print "Arduino Response:"
-                            print "> " + str(serIn)
+                            while True:
+                                emergSem.acquire()
+                                state = emergState
+                                emergSem.release()
+                                if not state:
+                                    print
+                                    print "Command Arduino to:"
+                                    print "> Reset Tray"
+                                    serSem.acquire()
+                                    ser.write('R')
+                                    serSem.release()
+                                    serIn = readSerial()
+                                    print
+                                    print "Arduino Response:"
+                                    print "> " + str(serIn)
+                                    break
                             
                 if numDrinks >= 6:
                     print "Six drinks have been made"
