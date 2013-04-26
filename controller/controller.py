@@ -413,11 +413,14 @@ def main():
             print "Error initializing Serial Monitor Thread"
 
         # Wait until start button is pressed
-        semaphore.acquire()
-        while emergState:
+        while True:
+            semaphore.acquire()
+            if not emergState:
+                semaphore.release()
+                break
             semaphore.release()
             time.sleep(0.2)
-        semaphore.release()
+            
 
         print 'Initialization Complete'
         print
@@ -485,7 +488,7 @@ def main():
         print 'Exiting...'
     except Exception:
         traceback.print_exc(file=sys.stdout)
-    t.exit()
+    t.exit(0)
     sys.exit(0)
 
 
