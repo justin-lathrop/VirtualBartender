@@ -354,7 +354,6 @@ def readSerial():
         if not temp:
             respSem.acquire()
             temp = responseQueue
-            #print "[" + str(temp) + "] From response queue readSerial()"
             respSem.release()
             if len(temp) > 0:
                 string = temp[0]
@@ -446,7 +445,6 @@ def serialMonitor(name):
         else:
             respSem.acquire()
             responseQueue = str(responseQueue + serIn)
-            #print "[" + responseQueue + "] responseQueue from monitor thread"
             respSem.release()
         time.sleep(0.2)
 
@@ -510,7 +508,7 @@ def main():
                             numDrinks = 0
                             markOrderComplete()
                             print "Failed to make order"
-                            print "Reseting Environment"
+                            print "Environment Reset"
                             
                 if numDrinks >= 6:
                     print "Six drinks have been made"
