@@ -430,7 +430,13 @@ def serialMonitor(name):
                     print 'R'
                     serSem.release()
                     print "before"
-                    serIn = readSerial()
+                    #serIn = readSerial()
+                    while True:
+                        serSem.acquire()
+                        serIn = ser.read()
+                        serSem.release()
+                        if serIn == '!':
+                            break
                     print "after"
                     print
                     print "Arduino Response:"
