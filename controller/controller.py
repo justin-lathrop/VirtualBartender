@@ -365,11 +365,14 @@ def serialMonitor(name):
     semaphore.release()
     print "Serial Monitor Thread Initialized"
 
-    semaphore.acquire()
-    while ser.read() != '!':
-        print str(emergState)
-        emergState = False
-        semaphore.release()
+    
+    while True:
+        if ser.read() == '!':
+            semaphore.acquire()
+            print str(emergState)
+            emergState = False
+            semaphore.release()
+            break
 
     # Loop forever reading the serial port and
     # updating the responseQueue
