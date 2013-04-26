@@ -60,7 +60,9 @@ drinkNames = ["Cherry", "Orange", "Grape", "Lemonade", "Strawberry",
               "RaspberryLemonade", "TropicalPunch"]
 emergState = True
 responseQueue = ''
-semaphore = threading.BoundedSemaphore()
+emergSem = threading.BoundedSemaphore()
+serSem = threading.BoundedSemaphore()
+respSem = threading.BoundedSemaphore()
 ser = serial.Serial(serialDevice, baudRate)#, timeout=0
 
 
@@ -199,15 +201,18 @@ def fillOrder(order):
     global emergState
     global responseQueue
     global ser
+    global emergSem
+    global serSem
+    global respSem
     print 'Filling order <' + order['title'] + '>'
 
 
     while not listDone(order['drinkList'], 0):
-        semaphore.acquire()
-        if emergState:
-            semaphore.release()
+        emergSem.acquire()
+        temp = emergState
+        emergSem.release()
+        if temp:
             return False
-        semaphore.release()
         count = 0
         msg = ''
         amount = smallestDrinkAmount(order['drinkList'])
@@ -225,23 +230,25 @@ def fillOrder(order):
                     msg = msg + '0'
 
         msg = 'P' + msg + str(amount)
-        semaphore.acquire()
-        if emergState:
-            semaphore.release()
+        emergSem.acquire()
+        temp = emergSem
+        emergSem.release()
+        if temp:
             return False
+        serSem.acquire()
         ser.write(msg)
-        semaphore.release()
+        serSem.release()
         
         print "Command Arduino to:"
         print "> Dispense Liquid in Parallel"
         print "> " + msg
 
         serIn = readSerial()
-        semaphore.acquire()
-        if emergState:
-            semaphore.release()
+        emergSem.acquire()
+        temp = emergState
+        emergSem.release()
+        if temp:
             return False
-        semaphore.release()
         print "Arduino Reponse:"
         print "> " + serIn
         print
@@ -250,21 +257,23 @@ def fillOrder(order):
     time.sleep(3)
 
     # Turn tray to next position
-    semaphore.acquire()
-    if emergState:
-        semaphore.release()
+    emergSem.acquire()
+    temp = emergState
+    emergSem.release()
+    if temp:
         return False
-    semaphore.release()
     print "Command Arduino to:"
     print "> Move tray 1 position"
+    serSem.acquire()
     ser.write('T')
     ser.write('1')
+    serSem.release()
     serIn = readSerial()
-    semaphore.acquire()
-    if emergState:
-        semaphore.release()
+    emergSem.acquire()
+    temp = emergState
+    emergSem.release()
+    if temp:
         return False
-    semaphore.release()
     print "Arduino Response:"
     print "> " + serIn
     print
@@ -334,14 +343,23 @@ def readSerial():
     """
     global emergState
     global responseQueue
+    global emergSem
+    global serSem
+    global respSem
     
-    semaphore.acquire()
-    while not emergState:
-        if len(responseQueue) > 0:
-            return responseQueue[0]
-        semaphore.release()
+    while True:
+        emergSem.acquire()
+        temp = emergState
+        emergSem.release()
+        if not temp:
+            respSem.acquire()
+            temp = responseQueue
+            respSem.release()
+            if len(temp) > 0:
+                return temp[0]
+        else:
+            return False
         time.sleep(0.2)
-    semaphore.release()
     return False
 
 
@@ -356,50 +374,64 @@ def serialMonitor(name):
     global emergState
     global responseQueue
     global ser
+    global emergSem
+    global serSem
+    global respSem
     
     time.sleep(2)
-    semaphore.acquire()
+    serSem.acquire()
     ser.flush()
     ser.flushInput()
     ser.flushOutput()
-    semaphore.release()
+    serSem.release()
     print "Serial Monitor Thread Initialized"
 
     
     while True:
-        if ser.read() == '!':
-            semaphore.acquire()
+        serSem.acquire()
+        serIn = ser.read()
+        serSem.release()
+        if serIn == '!':
+            emergSem.acquire()
             print str(emergState)
             emergState = False
-            semaphore.release()
+            print str(emergState)
+            emergSem.release()
             break
 
     # Loop forever reading the serial port and
     # updating the responseQueue
     while True:
-        semaphore.acquire()
+        serSem.acquire()
         serIn = ser.read()
-        semaphore.release()
+        serSem.release()
         if serIn == '!':
-            semaphore.acquire()
+            emergSem.acquire()
             emergState = True
-            semaphore.release()
+            emergSem.release()
             print
             print "!!!! EMERGENCY BEGIN !!!!"
             print "Skipping current drink..."
             print "Will wait until Go button pressed..."
-            semaphore.acquire()
-            while ser.read() != '!':
+            while True:
+                serSem.acquire()
+                serIn = ser.read()
+                serSem.release()
+                if serIn == '!':
+                    emergSem.acquire()
+                    emergState = False
+                    emergSem.release()
+                    respSem.acquire()
+                    responseQueue = ''
+                    respSem.release()
+                    break
                 time.sleep(0.2)
-            emergState = False
-            responseQueue = ''
-            semaphore.release()
             print "!!!! EMERGENCY FINISH !!!!"
             print
         else:
-            semaphore.acquire()
+            respSem.acquire()
             responseQueue = responseQueue + serIn
-            semaphore.release()
+            respSem.release()
         time.sleep(0.2)
 
 
@@ -407,6 +439,9 @@ def main():
     global emergState
     global responseQueue
     global ser
+    global emergSem
+    global serSem
+    global respSem
     
     try:
         print 'Initializing Controller'
@@ -418,11 +453,11 @@ def main():
 
         # Wait until start button is pressed
         while True:
-            semaphore.acquire()
+            emergSem.acquire()
             if not emergState:
-                semaphore.release()
+                emergSem.release()
                 break
-            semaphore.release()
+            emergSem.release()
             time.sleep(0.2)
             
 
@@ -439,9 +474,9 @@ def main():
 
         # Loop forever filling orders
         while 1:
-            semaphore.acquire()
+            emergSem.acquire()
             state = emergState
-            semaphore.release()
+            emergSem.release()
             if not state:
                 if admin():
                     fillAdminReq()
@@ -471,9 +506,9 @@ def main():
                     print "Six drinks have been made"
                     print "Command Arduino to:"
                     print "> Get start button press"
-                    semaphore.acquire()
+                    serSem.acquire()
                     ser.write('B')
-                    semaphore.release()
+                    serSem.release()
                     serIn = readSerial()
                     if serIn == '1':
                         print "Arduino Response:"
