@@ -431,7 +431,7 @@ def serialMonitor(name):
             print
         else:
             respSem.acquire()
-            responseQueue = responseQueue + serIn if len(serIn) > 0 else '-' ############
+            responseQueue = responseQueue + serIn if len(serIn) > 0 else ''
             print "[" + responseQueue + "] responseQueue from monitor thread"
             respSem.release()
         time.sleep(0.2)
