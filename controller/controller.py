@@ -359,8 +359,8 @@ def readSerial():
             respSem.release()
             if len(temp) > 0:
                 return temp[0]
-        #else:
-            #return False
+        else:
+            return False
         time.sleep(0.2)
     return False
 
