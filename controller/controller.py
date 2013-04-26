@@ -157,10 +157,7 @@ def updateDrinkAmounts(List, amount, index):
     """
     for i in List:
         if (int(i['amount']) > 0) and (drinkNames[index] == i['drink']):
-            print "Update Drink Amounts: "
-            print "before " + i['amount']
             i['amount'] = str( int(i['amount']) - amount )
-            print "after " + i['amount']
     return List
 
 
