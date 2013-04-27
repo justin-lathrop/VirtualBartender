@@ -238,7 +238,10 @@ boolean resetTray(){
   while(1){
     if(emergState) return false;
     count++;
-    if(count >= 240) break;
+    if(count >= 240){
+      myStepper_tray.step(-3);
+      break;
+    }
 
     if(analogRead(A1) > PHOTO_SENSOR_LIMIT){
       return true;
